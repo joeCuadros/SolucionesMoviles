@@ -8,6 +8,50 @@ import javax.inject.Inject
 class Repository @Inject constructor(
     private val plantaDao: PlantaDao
 ){
-    fun getPlantasTodas(): Flow<List<Planta>> = plantaDao.getPlantasTodas()
-    suspend fun insertarPlanta(planta: Planta) = plantaDao.insertarPlanta(planta)
+    suspend fun insertarPlanta(planta: Planta) {
+        plantaDao.insertarPlanta(planta)
+    }
+
+    // Actualizar
+    suspend fun updatePlanta(planta: Planta) {
+        plantaDao.updatePlanta(planta)
+    }
+
+    suspend fun activarPlanta(codPla: Int) {
+        plantaDao.activarPlanta(codPla)
+    }
+
+    suspend fun inactivarPlanta(codPla: Int) {
+        plantaDao.inactivarPlanta(codPla)
+    }
+
+    // Eliminaciones
+    suspend fun deletePlanta(planta: Planta) {
+        plantaDao.deletePlanta(planta)
+    }
+
+    suspend fun eliminarLogico(codPla: Int) {
+        plantaDao.eliminarLogico(codPla)
+    }
+
+    // Obtener todas
+    fun getPlantasTodas(): Flow<List<Planta>> {
+        return plantaDao.getPlantasTodas()
+    }
+
+    fun getPlantasActivas(): Flow<List<Planta>> {
+        return plantaDao.getPlantasActivas()
+    }
+
+    fun getPlantasInactivas(): Flow<List<Planta>> {
+        return plantaDao.getPlantasInactivas()
+    }
+
+    fun getPlantasEliminadas(): Flow<List<Planta>> {
+        return plantaDao.getPlantasEliminadas()
+    }
+
+    suspend fun getPlanta(codPla: Int): Planta? {
+        return plantaDao.getPlanta(codPla)
+    }
 }

@@ -24,6 +24,7 @@ import androidx.navigation.compose.*
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.idnp2025b.solucionesmoviles.ui.screens.Home
+import com.idnp2025b.solucionesmoviles.ui.screens.NewPlanta
 import com.idnp2025b.solucionesmoviles.ui.screens.Planta
 import com.idnp2025b.solucionesmoviles.ui.screens.Taller
 import com.idnp2025b.solucionesmoviles.ui.screens.Tipo_taller
@@ -48,7 +49,9 @@ fun MainScreen() {
         "taller" -> "Gestion de Talleres"
         "tipo_taller" -> "Gestion de Tipos de taller"
         "departamento" -> "Gestion de Departamentos"
+        // gestion de plantas
         "planta" -> "Gestion de Plantas"
+        "new_planta" -> "Agregar una nueva planta"
         else -> "App"
     }
 
@@ -105,6 +108,9 @@ fun MainScreen() {
             }
             composable("planta") {
                 Planta(navController = navController)
+            }
+            composable("new_planta") {
+                NewPlanta(navController = navController)
             }
             /*
             composable(
