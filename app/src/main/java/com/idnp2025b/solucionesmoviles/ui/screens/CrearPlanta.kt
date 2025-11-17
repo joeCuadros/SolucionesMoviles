@@ -27,39 +27,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.idnp2025b.solucionesmoviles.ui.effects.HandleUiStateEffects
 import com.idnp2025b.solucionesmoviles.viewmodel.PlantaViewModel
 import com.idnp2025b.solucionesmoviles.viewmodel.UiState
 
 @Composable
-fun NewPlanta(
+fun CrearPlanta(
     navController: NavController,
     viewModel: PlantaViewModel = hiltViewModel()
 ) {
     var nombrePlanta by remember { mutableStateOf("") }
-    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState) {
-        when (val state = uiState) {
-            is UiState.Success -> {
-                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
-                viewModel.resetState()
-                navController.popBackStack()
-            }
-            is UiState.Error -> {
-                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
-                viewModel.resetState()
-            }
-            else -> { }
-        }
-    }
+    HandleUiStateEffects(
+        uiState = uiState,
+        onResetState = { viewModel.resetState() },
+        onSuccess = { navController.popBackStack() }
+    )
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Formulario de nueva planta", style = MaterialTheme.typography.titleLarge)
+        Text("Formulario de nueva Planta", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(
@@ -76,7 +67,7 @@ fun NewPlanta(
         Button(
             onClick = {
                 if (nombrePlanta.isNotBlank()) {
-                    viewModel.agregar(nombrePlanta)
+                    viewModel.agregarPlanta(nombrePlanta)
                 }
             },
             modifier = Modifier.fillMaxWidth(),

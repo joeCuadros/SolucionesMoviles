@@ -79,6 +79,11 @@ fun Planta(
                 onClick = { viewModel.cargarPlantas(FiltroPlanta.INACTIVAS) },
                 label = { Text("Inactivas") }
             )
+            FilterChip(
+                selected = filtroActual == FiltroPlanta.ELIMINADAS,
+                onClick = { viewModel.cargarPlantas(FiltroPlanta.ELIMINADAS) },
+                label = { Text("Eliminadas") }
+            )
         }
 
         // Lista de plantas
@@ -95,7 +100,8 @@ fun Planta(
                     onActivar = { viewModel.activarPlanta(it) },
                     onInactivar = { viewModel.inactivarPlanta(it) },
                     onEliminar = { viewModel.eliminarLogico(it) },
-                    onEliminarFisico = { viewModel.deletePlanta(it) }
+                    onEliminarFisico = { viewModel.deletePlanta(it) },
+                    onEditar = { navController.navigate("edit_planta/${planta.codPla}")}
                 )
             }
         }

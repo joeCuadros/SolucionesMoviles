@@ -51,7 +51,7 @@ class Repository @Inject constructor(
         return plantaDao.getPlantasEliminadas()
     }
 
-    suspend fun getPlanta(codPla: Int): Planta? {
+    fun getPlanta(codPla: Int): Flow<Planta?> {
         return plantaDao.getPlanta(codPla)
     }
 }

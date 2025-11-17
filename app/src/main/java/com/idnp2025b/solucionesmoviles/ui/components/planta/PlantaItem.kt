@@ -23,7 +23,8 @@ fun PlantaItem(
     onActivar: (Int) -> Unit,
     onInactivar: (Int) -> Unit,
     onEliminar: (Int) -> Unit,
-    onEliminarFisico: (Planta) -> Unit
+    onEliminarFisico: (Planta) -> Unit,
+    onEditar: (Int) -> Unit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -56,7 +57,6 @@ fun PlantaItem(
             )
 
             Spacer(Modifier.height(8.dp))
-
             // Botones según estado
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -75,6 +75,12 @@ fun PlantaItem(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text("Eliminar")
+                        }
+                        OutlinedButton(
+                            onClick = { onEditar(planta.codPla) },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Editar")
                         }
                     }
                     "I" -> {

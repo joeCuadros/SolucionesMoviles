@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.idnp2025b.solucionesmoviles.data.entities.Planta
 import com.idnp2025b.solucionesmoviles.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -56,7 +57,11 @@ class PlantaViewModel @Inject constructor(
         }
     }
 
-    fun agregar(nombre: String) {
+    fun obtenerPlanta(codPla: Int): Flow<Planta?>{
+        return repository.getPlanta(codPla)
+    }
+
+    fun agregarPlanta(nombre: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
@@ -70,12 +75,14 @@ class PlantaViewModel @Inject constructor(
         }
     }
 
-    fun actualizar(planta: Planta) {
+    fun actualizarPlanta(planta: Planta) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
                 repository.updatePlanta(planta)
                 _uiState.value = UiState.Success("Planta actualizada correctamente")
+            } catch (e: SQLiteConstraintException) {
+                _uiState.value = UiState.Error("El nombre de la planta ya existe")
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Error al actualizar: ${e.message}")
             }

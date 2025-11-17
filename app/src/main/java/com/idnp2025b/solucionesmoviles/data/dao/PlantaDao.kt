@@ -47,5 +47,5 @@ interface PlantaDao {
     fun getPlantasEliminadas(): Flow<List<Planta>>
 
     @Query("SELECT * FROM plantas WHERE codPla = :codPla")
-    suspend fun getPlanta(codPla: Int): Planta?
+    fun getPlanta(codPla: Int): Flow<Planta?>
 }

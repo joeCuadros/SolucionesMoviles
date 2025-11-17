@@ -12,7 +12,11 @@ import androidx.compose.foundation.layout.padding
 // Imports de Iconos
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.LocationOn
 
 // Imports de Runtime y Navegación
 import androidx.compose.runtime.Composable
@@ -23,8 +27,11 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.idnp2025b.solucionesmoviles.ui.screens.EditarPlanta
 import com.idnp2025b.solucionesmoviles.ui.screens.Home
-import com.idnp2025b.solucionesmoviles.ui.screens.NewPlanta
+import com.idnp2025b.solucionesmoviles.ui.screens.CrearPlanta
 import com.idnp2025b.solucionesmoviles.ui.screens.Planta
 import com.idnp2025b.solucionesmoviles.ui.screens.Taller
 import com.idnp2025b.solucionesmoviles.ui.screens.Tipo_taller
@@ -36,25 +43,28 @@ fun MainScreen() {
 
     val items = listOf(
         BottomNavItem("Home", "home", Icons.Default.Home),
-        BottomNavItem("Taller", "taller", Icons.Default.Home),
-        BottomNavItem("Tipo de Taller", "tipo_taller", Icons.Default.Home),
-        BottomNavItem("Planta", "planta", Icons.Default.Home),
+        BottomNavItem("Taller", "taller", Icons.Default.Build),
+        BottomNavItem("Tipo de Taller", "tipo_taller", Icons.AutoMirrored.Filled.List),
+        BottomNavItem("Planta", "planta", Icons.Default.LocationOn),
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    val currentScreenTitle = when (currentDestination?.route) {
-        "home" -> "Menu Principal"
-        "taller" -> "Gestion de Talleres"
-        "tipo_taller" -> "Gestion de Tipos de taller"
-        "departamento" -> "Gestion de Departamentos"
+    val currentScreenTitle = when { // 1. Quita la variable de aquí
+        // 2. Ahora compara en cada línea
+        currentDestination?.route == "home" -> "Inicio"
+        currentDestination?.route == "taller" -> "Talleres"
+        currentDestination?.route == "tipo_taller" -> "Tipos de taller"
+        currentDestination?.route == "departamento" -> "Departamentos"
+
         // gestion de plantas
-        "planta" -> "Gestion de Plantas"
-        "new_planta" -> "Agregar una nueva planta"
+        currentDestination?.route == "planta" -> "Plantas"
+        currentDestination?.route == "new_planta" -> "Nueva Planta"
+        currentDestination?.route?.startsWith("edit_planta") == true -> "Editar Planta"
         else -> "App"
     }
-
+    // validar si esta dentro de los principales o no
     val canPop = items.none { it.route == currentDestination?.route }
 
     Scaffold(
@@ -110,7 +120,18 @@ fun MainScreen() {
                 Planta(navController = navController)
             }
             composable("new_planta") {
-                NewPlanta(navController = navController)
+                CrearPlanta(navController = navController)
+            }
+            composable(
+                route = "edit_planta/{codPla}", // El placeholder
+                arguments = listOf(navArgument("codPla") { type = NavType.IntType }) // Define el argumento
+            ) { backStackEntry ->
+                val codPla = backStackEntry.arguments?.getInt("codPla")
+                if (codPla != null) {
+                    EditarPlanta(navController = navController, codPla = codPla)
+                } else {
+                    navController.popBackStack()
+                }
             }
             /*
             composable(
