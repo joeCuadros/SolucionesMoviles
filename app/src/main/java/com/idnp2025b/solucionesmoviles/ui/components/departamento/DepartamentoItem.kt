@@ -1,4 +1,4 @@
-package com.idnp2025b.solucionesmoviles.ui.components.planta
+package com.idnp2025b.solucionesmoviles.ui.components.departamento
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,16 +15,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.idnp2025b.solucionesmoviles.data.entities.Planta
+import com.idnp2025b.solucionesmoviles.data.entities.Departamento
 
 @Composable
-fun PlantaItem(
-    planta: Planta,
+fun DepartamentoItem(
+    departamento: Departamento,
     onActivar: (Int) -> Unit,
     onInactivar: (Int) -> Unit,
     onEliminar: (Int) -> Unit,
-    onEliminarFisico: (Planta) -> Unit,
-    onEditar: (Int) -> Unit,
+    onEliminarFisico: (Departamento) -> Unit,
+    onEditar: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -36,24 +36,24 @@ fun PlantaItem(
                 .padding(12.dp)
         ) {
             Text(
-                text = "CÓDIGO: ${planta.codPla}",
-                style = MaterialTheme.typography.labelSmall, // Un estilo pequeño
+                text = "CÓDIGO: ${departamento.codDep}",
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Planta: ${planta.nomPla}",
+                text = "Departamento: ${departamento.nomDep}",
                 style = MaterialTheme.typography.titleMedium
             )
 
             Text(
-                text = "Estado: ${when(planta.estPla) {
-                    "A" -> "Activa"
-                    "I" -> "Inactiva"
-                    "E" -> "Eliminada"
+                text = "Estado: ${when(departamento.estDep) {
+                    "A" -> "Activo"
+                    "I" -> "Inactivo"
+                    "E" -> "Eliminado"
                     else -> "Desconocido"
                 }}",
                 style = MaterialTheme.typography.bodySmall,
-                color = when(planta.estPla) {
+                color = when(departamento.estDep) {
                     "A" -> MaterialTheme.colorScheme.primary
                     "I" -> MaterialTheme.colorScheme.secondary
                     "E" -> MaterialTheme.colorScheme.error
@@ -62,59 +62,50 @@ fun PlantaItem(
             )
 
             Spacer(Modifier.height(8.dp))
+
             // Botones según estado
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                when (planta.estPla) {
+                when (departamento.estDep) {
                     "A" -> {
                         OutlinedButton(
-                            onClick = { onInactivar(planta.codPla) },
+                            onClick = { onInactivar(departamento.codDep) },
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Inactivar")
-                        }
+                        ) { Text("Inactivar") }
+
                         OutlinedButton(
-                            onClick = { onEditar(planta.codPla) },
+                            onClick = { onEditar() },
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Editar")
-                        }
+                        ) { Text("Editar") }
+
                         OutlinedButton(
-                            onClick = { onEliminar(planta.codPla) },
+                            onClick = { onEliminar(departamento.codDep) },
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Eliminar")
-                        }
+                        ) { Text("Eliminar") }
                     }
                     "I" -> {
                         OutlinedButton(
-                            onClick = { onActivar(planta.codPla) },
+                            onClick = { onActivar(departamento.codDep) },
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Activar")
-                        }
+                        ) { Text("Activar") }
+
                         OutlinedButton(
-                            onClick = { onEliminar(planta.codPla) },
+                            onClick = { onEliminar(departamento.codDep) },
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Eliminar")
-                        }
+                        ) { Text("Eliminar") }
                     }
                     "E" -> {
                         OutlinedButton(
-                            onClick = { onActivar(planta.codPla) },
+                            onClick = { onActivar(departamento.codDep) },
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Restaurar")
-                        }
+                        ) { Text("Restaurar") }
+
                         OutlinedButton(
-                            onClick = { onEliminarFisico(planta) },
+                            onClick = { onEliminarFisico(departamento) },
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Elim. Perm.")
-                        }
+                        ) { Text("Elim. Perm.") }
                     }
                 }
             }

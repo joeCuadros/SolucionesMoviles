@@ -1,4 +1,4 @@
-package com.idnp2025b.solucionesmoviles.ui.screens.planta
+package com.idnp2025b.solucionesmoviles.ui.screens.tipotaller
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -35,21 +35,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.idnp2025b.solucionesmoviles.ui.components.planta.PlantaItem
-import com.idnp2025b.solucionesmoviles.viewmodel.FiltroPlanta
-import com.idnp2025b.solucionesmoviles.viewmodel.PlantaViewModel
+import com.idnp2025b.solucionesmoviles.ui.components.tipotaller.TipoTallerItem
+import com.idnp2025b.solucionesmoviles.viewmodel.FiltroTipoTaller
+import com.idnp2025b.solucionesmoviles.viewmodel.TipoTallerViewModel
 import com.idnp2025b.solucionesmoviles.viewmodel.UiState
 
 @Composable
-fun Planta(
-    navController: NavController, viewModel: PlantaViewModel = hiltViewModel()
+fun TipoTaller(
+    navController: NavController, viewModel: TipoTallerViewModel = hiltViewModel()
 ) {
-    val plantas by viewModel.plantas.collectAsState()
+    val tipoTalleres by viewModel.tipoTalleres.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val filtroActual by viewModel.filtroActual.collectAsState()
     val context = LocalContext.current
 
-    // --- 1. ESTADOS PARA LOS NUEVOS CONTROLES ---
     var searchQuery by remember { mutableStateOf("") }
     var ascendente by remember { mutableStateOf(true) }
 
@@ -71,7 +70,7 @@ fun Planta(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Filtros de estado (sin cambios)
+        // Filtros de estado
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -79,28 +78,28 @@ fun Planta(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             FilterChip(
-                selected = filtroActual == FiltroPlanta.TODAS,
-                onClick = { viewModel.cargarPlantas(FiltroPlanta.TODAS) },
-                label = { Text("Todas") }
+                selected = filtroActual == FiltroTipoTaller.TODAS,
+                onClick = { viewModel.cargarTipoTalleres(FiltroTipoTaller.TODAS) },
+                label = { Text("Todos") }
             )
             FilterChip(
-                selected = filtroActual == FiltroPlanta.ACTIVAS,
-                onClick = { viewModel.cargarPlantas(FiltroPlanta.ACTIVAS) },
-                label = { Text("Activas") }
+                selected = filtroActual == FiltroTipoTaller.ACTIVAS,
+                onClick = { viewModel.cargarTipoTalleres(FiltroTipoTaller.ACTIVAS) },
+                label = { Text("Activos") }
             )
             FilterChip(
-                selected = filtroActual == FiltroPlanta.INACTIVAS,
-                onClick = { viewModel.cargarPlantas(FiltroPlanta.INACTIVAS) },
-                label = { Text("Inactivas") }
+                selected = filtroActual == FiltroTipoTaller.INACTIVAS,
+                onClick = { viewModel.cargarTipoTalleres(FiltroTipoTaller.INACTIVAS) },
+                label = { Text("Inactivos") }
             )
             FilterChip(
-                selected = filtroActual == FiltroPlanta.ELIMINADAS,
-                onClick = { viewModel.cargarPlantas(FiltroPlanta.ELIMINADAS) },
-                label = { Text("Eliminadas") }
+                selected = filtroActual == FiltroTipoTaller.ELIMINADAS,
+                onClick = { viewModel.cargarTipoTalleres(FiltroTipoTaller.ELIMINADAS) },
+                label = { Text("Eliminados") }
             )
         }
 
-        // --- 2. NUEVA FILA PARA BUSCADOR Y ORDEN ---
+        // Fila para Buscador y Orden
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -108,20 +107,17 @@ fun Planta(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Buscador
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 label = { Text("Buscar por nombre...") },
-                modifier = Modifier.weight(1f), // Ocupa el espacio disponible
+                modifier = Modifier.weight(1f),
                 singleLine = true,
                 trailingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") }
             )
-
-            // Botón de Orden
             IconToggleButton(
                 checked = ascendente,
-                onCheckedChange = { ascendente = !ascendente } // Invierte el valor
+                onCheckedChange = { ascendente = !ascendente }
             ) {
                 if (ascendente) {
                     Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Orden Ascendente")
@@ -131,24 +127,21 @@ fun Planta(
             }
         }
 
-        // --- 3. LÓGICA DE FILTRADO Y ORDEN ---
-        val plantasProcesadas = remember(plantas, searchQuery, ascendente) {
-            plantas
-                // Primero filtramos por la búsqueda
-                .filter { planta ->
-                    planta.nomPla.contains(searchQuery, ignoreCase = true)
+        val tipoTalleresProcesados = remember(tipoTalleres, searchQuery, ascendente) {
+            tipoTalleres
+                .filter { tt ->
+                    tt.nomTipTal.contains(searchQuery, ignoreCase = true)
                 }
-                // Luego ordenamos
                 .let { filtradas ->
                     if (ascendente) {
-                        filtradas.sortedBy { it.nomPla }
+                        filtradas.sortedBy { it.nomTipTal }
                     } else {
-                        filtradas.sortedByDescending { it.nomPla }
+                        filtradas.sortedByDescending { it.nomTipTal }
                     }
                 }
         }
 
-        // --- 4. LISTA DE PLANTAS (MODIFICADA) ---
+        // Lista de tipo de talleres
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -156,29 +149,28 @@ fun Planta(
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Usamos la lista procesada
-            items(plantasProcesadas) { planta ->
-                PlantaItem (
-                    planta = planta,
-                    onActivar = { viewModel.activarPlanta(it) },
-                    onInactivar = { viewModel.inactivarPlanta(it) },
-                    onEliminar = { viewModel.eliminarLogicoPlanta(it) },
-                    onEliminarFisico = { viewModel.deletePlanta(it) },
-                    onEditar = { navController.navigate("edit_planta/${planta.codPla}")}
+            items(tipoTalleresProcesados) { tipoTaller ->
+                TipoTallerItem (
+                    tipoTaller = tipoTaller,
+                    onActivar = { viewModel.activarTipoTaller(it) },
+                    onInactivar = { viewModel.inactivarTipoTaller(it) },
+                    onEliminar = { viewModel.eliminarLogicoTipoTaller(it) },
+                    onEliminarFisico = { viewModel.deleteTipoTaller(tipoTaller) },
+                    onEditar = { navController.navigate("edit_tipo_taller/${tipoTaller.codTipTal}")}
                 )
             }
         }
 
         Spacer(Modifier.height(8.dp))
 
-        // Botón agregar (sin cambios)
+        // Botón agregar
         Button(
-            onClick = { navController.navigate("new_planta") },
+            onClick = { navController.navigate("new_tipo_taller") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text("Agregar nueva planta")
+            Text("Agregar nuevo Tipo de Taller")
         }
     }
 }

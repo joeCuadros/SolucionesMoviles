@@ -21,38 +21,3 @@ fun Home(navController: NavController) {
     }
 }
 
-/*
-* @Composable
-fun LibretaScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Pantalla de LIBRETA", style = MaterialTheme.typography.titleLarge)
-    }
-}
-@Composable
-fun PerfilScreen(navController: NavController) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // 🔥 CAMBIO: 'titleLarge' es el estilo de M3
-        Text("Pantalla de PERFIL", style = MaterialTheme.typography.titleLarge)
-
-        Button(onClick = {
-            navController.navigate("detalle") // Navega a la ruta "detalle"
-        }) {
-            Text("Ir a Detalle")
-        }
-        Button(onClick = {
-            // Navega a la ruta "detalle" mandando un ID
-            navController.navigate("detalle2/12345")
-        }) {
-            Text("Ir a Detalle con ID 12345")
-        }
-    }
-}
-* */

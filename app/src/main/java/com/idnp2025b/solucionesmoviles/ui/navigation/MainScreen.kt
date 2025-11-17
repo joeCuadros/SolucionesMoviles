@@ -31,11 +31,15 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.idnp2025b.solucionesmoviles.ui.screens.planta.EditarPlanta
 import com.idnp2025b.solucionesmoviles.ui.screens.Home
+import com.idnp2025b.solucionesmoviles.ui.screens.departamento.CrearDepartamento
 import com.idnp2025b.solucionesmoviles.ui.screens.departamento.Departamento
+import com.idnp2025b.solucionesmoviles.ui.screens.departamento.EditarDepartamento
 import com.idnp2025b.solucionesmoviles.ui.screens.planta.CrearPlanta
 import com.idnp2025b.solucionesmoviles.ui.screens.planta.Planta
 import com.idnp2025b.solucionesmoviles.ui.screens.taller.Taller
-import com.idnp2025b.solucionesmoviles.ui.screens.tipotaller.Tipo_taller
+import com.idnp2025b.solucionesmoviles.ui.screens.tipotaller.CrearTipoTaller
+import com.idnp2025b.solucionesmoviles.ui.screens.tipotaller.EditarTipoTaller
+import com.idnp2025b.solucionesmoviles.ui.screens.tipotaller.TipoTaller
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,9 +60,14 @@ fun MainScreen() {
         // 2. Ahora compara en cada línea
         currentDestination?.route == "home" -> "Inicio"
         currentDestination?.route == "taller" -> "Talleres"
-        currentDestination?.route == "tipo_taller" -> "Tipos de taller"
-        currentDestination?.route == "departamento" -> "Departamento"
-
+        // -gestion de tipo de taller
+        currentDestination?.route == "tipo_taller" -> "Tipos de Taller"
+        currentDestination?.route == "new_tipo_taller" -> "Nuevo Tipo de Taller"
+        currentDestination?.route?.startsWith("edit_tipo_taller") == true -> "Editar Tipo de Taller"
+        // gestion de departamento
+        currentDestination?.route == "departamento" -> "Departamentos"
+        currentDestination?.route == "new_departamento" -> "Nuevo Departamento"
+        currentDestination?.route?.startsWith("edit_departamento") == true -> "Editar Departamento"
         // gestion de plantas
         currentDestination?.route == "planta" -> "Plantas"
         currentDestination?.route == "new_planta" -> "Nueva Planta"
@@ -114,13 +123,44 @@ fun MainScreen() {
             composable("taller") {
                 Taller(navController = navController)
             }
+            // Rutas de taller
             composable("tipo_taller") {
-                Tipo_taller(navController = navController)
+                TipoTaller(navController = navController)
             }
+            composable("new_tipo_taller") {
+                CrearTipoTaller(navController = navController)
+            }
+            composable(
+                route = "edit_tipo_taller/{codTipTal}",
+                arguments = listOf(navArgument("codTipTal") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val codTipTal = backStackEntry.arguments?.getInt("codTipTal")
+                if (codTipTal != null) {
+                    EditarTipoTaller(navController = navController, codTipTal = codTipTal)
+                } else {
+                    navController.popBackStack()
+                }
+            }
+            //Rutas de Departamento
             composable("departamento") {
+                // Asumo que tu pantalla se llama 'Departamento'
                 Departamento(navController = navController)
             }
-            //Rutas para modificar Planta
+            composable("new_departamento") {
+                CrearDepartamento(navController = navController)
+            }
+            composable(
+                route = "edit_departamento/{codDep}",
+                arguments = listOf(navArgument("codDep") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val codDep = backStackEntry.arguments?.getInt("codDep")
+                if (codDep != null) {
+                    EditarDepartamento(navController = navController, codDep = codDep)
+                } else {
+                    navController.popBackStack()
+                }
+            }
+            //Rutas de Planta
             composable("planta") {
                 Planta(navController = navController)
             }

@@ -13,12 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed class UiState {
-    object Idle : UiState()
-    object Loading : UiState()
-    data class Success(val message: String) : UiState()
-    data class Error(val message: String) : UiState()
-}
 
 enum class FiltroPlanta {
     TODAS, ACTIVAS, INACTIVAS, ELIMINADAS
@@ -111,10 +105,10 @@ class PlantaViewModel @Inject constructor(
         }
     }
 
-    fun eliminarLogico(codPla: Int) {
+    fun eliminarLogicoPlanta(codPla: Int) {
         viewModelScope.launch {
             try {
-                repository.eliminarLogico(codPla)
+                repository.eliminarLogicoPlanta(codPla)
                 _uiState.value = UiState.Success("Planta eliminada")
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Error al eliminar: ${e.message}")

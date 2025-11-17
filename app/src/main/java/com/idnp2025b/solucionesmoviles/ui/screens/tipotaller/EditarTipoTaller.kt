@@ -1,4 +1,4 @@
-package com.idnp2025b.solucionesmoviles.ui.screens.planta
+package com.idnp2025b.solucionesmoviles.ui.screens.tipotaller
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,22 +27,22 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.idnp2025b.solucionesmoviles.ui.effects.HandleUiStateEffects
-import com.idnp2025b.solucionesmoviles.viewmodel.PlantaViewModel
+import com.idnp2025b.solucionesmoviles.viewmodel.TipoTallerViewModel
 import com.idnp2025b.solucionesmoviles.viewmodel.UiState
 
 @Composable
-fun EditarPlanta(
+fun EditarTipoTaller(
     navController: NavController,
-    codPla: Int,
-    viewModel: PlantaViewModel = hiltViewModel()
+    codTipTal: Int,
+    viewModel: TipoTallerViewModel = hiltViewModel()
 ) {
-    var nombrePlanta by remember { mutableStateOf("") }
+    var nombreTipoTaller by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
-    val planta by viewModel.obtenerPlanta(codPla).collectAsState(initial = null)
+    val tipoTaller by viewModel.obtenerTipoTaller(codTipTal).collectAsState(initial = null)
 
-    LaunchedEffect(planta) {
-        planta?.let {
-            nombrePlanta = it.nomPla // Rellena el TextField con el nombre actual
+    LaunchedEffect(tipoTaller) {
+        tipoTaller?.let {
+            nombreTipoTaller = it.nomTipTal // Rellena el TextField con el nombre actual
         }
     }
 
@@ -51,8 +51,8 @@ fun EditarPlanta(
         onResetState = { viewModel.resetState() },
         onSuccess = { navController.popBackStack() }
     )
-    // pantalla
-    if (planta == null) {
+
+    if (tipoTaller == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -60,20 +60,19 @@ fun EditarPlanta(
             CircularProgressIndicator()
         }
     } else {
-        // Cuando la planta ya cargó, mostramos el formulario
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Editar Planta", style = MaterialTheme.typography.titleLarge)
+            Text("Editar Tipo de Taller", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(24.dp))
 
             // Campo de Código (no editable)
             OutlinedTextField(
-                value = codPla.toString(),
+                value = codTipTal.toString(),
                 onValueChange = {},
-                label = { Text("Código de la planta") },
+                label = { Text("Código de Tipo de Taller") },
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
                 enabled = false
@@ -81,30 +80,31 @@ fun EditarPlanta(
 
             Spacer(Modifier.height(16.dp))
 
+            // Campo de Nombre (editable)
             OutlinedTextField(
-                value = nombrePlanta,
-                onValueChange = { nombrePlanta = it },
-                label = { Text("Nombre de la planta") },
+                value = nombreTipoTaller,
+                onValueChange = { nombreTipoTaller = it },
+                label = { Text("Nombre del Tipo de Taller") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                enabled = uiState !is UiState.Loading // Se deshabilita al "guardar"
+                enabled = uiState !is UiState.Loading
             )
 
             Spacer(Modifier.height(16.dp))
-            // boton de actualizar
+
             Button(
                 onClick = {
-                    if (nombrePlanta.isNotBlank()) {
-                        planta?.let { plantaOriginal ->
-                            val plantaActualizada = plantaOriginal.copy(
-                                nomPla = nombrePlanta
+                    if (nombreTipoTaller.isNotBlank()) {
+                        tipoTaller?.let { ttOriginal ->
+                            val ttActualizado = ttOriginal.copy(
+                                nomTipTal = nombreTipoTaller
                             )
-                            viewModel.actualizarPlanta(plantaActualizada) //actualizar
+                            viewModel.actualizarTipoTaller(ttActualizado)
                         }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = uiState !is UiState.Loading && nombrePlanta.isNotBlank()
+                enabled = uiState !is UiState.Loading && nombreTipoTaller.isNotBlank()
             ) {
                 if (uiState is UiState.Loading) {
                     CircularProgressIndicator(

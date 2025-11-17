@@ -1,4 +1,4 @@
-package com.idnp2025b.solucionesmoviles.ui.screens.planta
+package com.idnp2025b.solucionesmoviles.ui.screens.departamento
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,22 +27,22 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.idnp2025b.solucionesmoviles.ui.effects.HandleUiStateEffects
-import com.idnp2025b.solucionesmoviles.viewmodel.PlantaViewModel
+import com.idnp2025b.solucionesmoviles.viewmodel.DepartamentoViewModel
 import com.idnp2025b.solucionesmoviles.viewmodel.UiState
 
 @Composable
-fun EditarPlanta(
+fun EditarDepartamento(
     navController: NavController,
-    codPla: Int,
-    viewModel: PlantaViewModel = hiltViewModel()
+    codDep: Int,
+    viewModel: DepartamentoViewModel = hiltViewModel()
 ) {
-    var nombrePlanta by remember { mutableStateOf("") }
-    val uiState by viewModel.uiState.collectAsState()
-    val planta by viewModel.obtenerPlanta(codPla).collectAsState(initial = null)
+    var nombreDepartamento by remember { mutableStateOf("") }
+        val uiState by viewModel.uiState.collectAsState()
+    val departamento by viewModel.obtenerDepartamento(codDep).collectAsState(initial = null)
 
-    LaunchedEffect(planta) {
-        planta?.let {
-            nombrePlanta = it.nomPla // Rellena el TextField con el nombre actual
+    LaunchedEffect(departamento) {
+        departamento?.let {
+            nombreDepartamento = it.nomDep // Rellena el TextField con el nombre actual
         }
     }
 
@@ -51,8 +51,8 @@ fun EditarPlanta(
         onResetState = { viewModel.resetState() },
         onSuccess = { navController.popBackStack() }
     )
-    // pantalla
-    if (planta == null) {
+
+    if (departamento == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -60,20 +60,19 @@ fun EditarPlanta(
             CircularProgressIndicator()
         }
     } else {
-        // Cuando la planta ya cargó, mostramos el formulario
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Editar Planta", style = MaterialTheme.typography.titleLarge)
+            Text("Editar Departamento", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(24.dp))
 
             // Campo de Código (no editable)
             OutlinedTextField(
-                value = codPla.toString(),
+                value = codDep.toString(),
                 onValueChange = {},
-                label = { Text("Código de la planta") },
+                label = { Text("Código de Departamento") },
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
                 enabled = false
@@ -81,30 +80,30 @@ fun EditarPlanta(
 
             Spacer(Modifier.height(16.dp))
 
+            // Campo de Nombre (editable)
             OutlinedTextField(
-                value = nombrePlanta,
-                onValueChange = { nombrePlanta = it },
-                label = { Text("Nombre de la planta") },
+                value = nombreDepartamento,
+                onValueChange = { nombreDepartamento = it },
+                label = { Text("Nombre del departamento") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                enabled = uiState !is UiState.Loading // Se deshabilita al "guardar"
+                enabled = uiState !is UiState.Loading
             )
-
             Spacer(Modifier.height(16.dp))
-            // boton de actualizar
+
             Button(
                 onClick = {
-                    if (nombrePlanta.isNotBlank()) {
-                        planta?.let { plantaOriginal ->
-                            val plantaActualizada = plantaOriginal.copy(
-                                nomPla = nombrePlanta
+                    if (nombreDepartamento.isNotBlank()) {
+                        departamento?.let { deptoOriginal ->
+                            val deptoActualizado = deptoOriginal.copy(
+                                nomDep = nombreDepartamento
                             )
-                            viewModel.actualizarPlanta(plantaActualizada) //actualizar
+                            viewModel.actualizarDepartamento(deptoActualizado)
                         }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = uiState !is UiState.Loading && nombrePlanta.isNotBlank()
+                enabled = uiState !is UiState.Loading && nombreDepartamento.isNotBlank()
             ) {
                 if (uiState is UiState.Loading) {
                     CircularProgressIndicator(
