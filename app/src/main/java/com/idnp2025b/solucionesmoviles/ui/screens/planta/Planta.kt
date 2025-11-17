@@ -1,4 +1,4 @@
-package com.idnp2025b.solucionesmoviles.ui.screens
+package com.idnp2025b.solucionesmoviles.ui.screens.planta
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement

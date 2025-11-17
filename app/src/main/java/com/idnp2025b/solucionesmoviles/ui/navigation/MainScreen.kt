@@ -15,8 +15,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Place
 
 // Imports de Runtime y Navegación
 import androidx.compose.runtime.Composable
@@ -29,12 +29,13 @@ import androidx.navigation.compose.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.idnp2025b.solucionesmoviles.ui.screens.EditarPlanta
+import com.idnp2025b.solucionesmoviles.ui.screens.planta.EditarPlanta
 import com.idnp2025b.solucionesmoviles.ui.screens.Home
-import com.idnp2025b.solucionesmoviles.ui.screens.CrearPlanta
-import com.idnp2025b.solucionesmoviles.ui.screens.Planta
-import com.idnp2025b.solucionesmoviles.ui.screens.Taller
-import com.idnp2025b.solucionesmoviles.ui.screens.Tipo_taller
+import com.idnp2025b.solucionesmoviles.ui.screens.departamento.Departamento
+import com.idnp2025b.solucionesmoviles.ui.screens.planta.CrearPlanta
+import com.idnp2025b.solucionesmoviles.ui.screens.planta.Planta
+import com.idnp2025b.solucionesmoviles.ui.screens.taller.Taller
+import com.idnp2025b.solucionesmoviles.ui.screens.tipotaller.Tipo_taller
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,8 +43,8 @@ fun MainScreen() {
     val navController = rememberNavController()
 
     val items = listOf(
-        BottomNavItem("Home", "home", Icons.Default.Home),
         BottomNavItem("Taller", "taller", Icons.Default.Build),
+        BottomNavItem("Departamento", "departamento", Icons.Default.Place),
         BottomNavItem("Tipo de Taller", "tipo_taller", Icons.AutoMirrored.Filled.List),
         BottomNavItem("Planta", "planta", Icons.Default.LocationOn),
     )
@@ -56,7 +57,7 @@ fun MainScreen() {
         currentDestination?.route == "home" -> "Inicio"
         currentDestination?.route == "taller" -> "Talleres"
         currentDestination?.route == "tipo_taller" -> "Tipos de taller"
-        currentDestination?.route == "departamento" -> "Departamentos"
+        currentDestination?.route == "departamento" -> "Departamento"
 
         // gestion de plantas
         currentDestination?.route == "planta" -> "Plantas"
@@ -116,6 +117,10 @@ fun MainScreen() {
             composable("tipo_taller") {
                 Tipo_taller(navController = navController)
             }
+            composable("departamento") {
+                Departamento(navController = navController)
+            }
+            //Rutas para modificar Planta
             composable("planta") {
                 Planta(navController = navController)
             }
@@ -133,16 +138,6 @@ fun MainScreen() {
                     navController.popBackStack()
                 }
             }
-            /*
-            composable(
-                route = "detalle2/{itemId}", // El placeholder
-                arguments = listOf(navArgument("itemId") { type = NavType.StringType }) // Define el argumento
-            ) { backStackEntry ->
-                // Extrae el ID de los argumentos de la ruta
-                val itemId = backStackEntry.arguments?.getString("itemId")
-                // Pasa el ID a la pantalla de Detalle
-                DetalleScreen2(itemId = itemId)
-            }*/
         }
     }
 }
@@ -151,46 +146,3 @@ data class BottomNavItem(
     val route: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector
 )
-
-
-/*
-@Composable
-fun PerfilScreen(navController: NavController) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Pantalla de PERFIL", style = MaterialTheme.typography.titleLarge)
-
-        Button(onClick = {
-            navController.navigate("detalle") // Navega a la ruta "detalle"
-        }) {
-            Text("Ir a Detalle")
-        }
-        Button(onClick = {
-            // Navega a la ruta "detalle" mandando un ID
-            navController.navigate("detalle2/12345")
-        }) {
-            Text("Ir a Detalle con ID 12345")
-        }
-    }
-}
-
-/*
-@Composable
-fun DetalleScreen2(itemId: String?) { // Recibe el ID
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Pantalla de DETALLE", style = MaterialTheme.typography.titleLarge)
-
-        // Muestra el ID que recibió
-        Text(
-            "Has llegado con el ID: ${itemId ?: "NINGUNO"}",
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
-}*/

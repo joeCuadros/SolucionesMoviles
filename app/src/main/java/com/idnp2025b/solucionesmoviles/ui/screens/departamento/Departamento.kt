@@ -1,4 +1,4 @@
-package com.idnp2025b.solucionesmoviles.ui.screens
+package com.idnp2025b.solucionesmoviles.ui.screens.departamento
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,12 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 
 @Composable
-fun Tipo_taller(navController: NavController) {
+fun Departamento(navController: NavController) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Gestion de tipos de talleres - texto", style = MaterialTheme.typography.titleLarge)
+        Text("Gestion de departamentos - texto", style = MaterialTheme.typography.titleLarge)
     }
 }

@@ -1,4 +1,4 @@
-package com.idnp2025b.solucionesmoviles.ui.screens
+package com.idnp2025b.solucionesmoviles.ui.screens.taller
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
