@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.idnp2025b.solucionesmoviles.data.AppDatabase
 import com.idnp2025b.solucionesmoviles.data.dao.DepartamentoDao
 import com.idnp2025b.solucionesmoviles.data.dao.PlantaDao
+import com.idnp2025b.solucionesmoviles.data.dao.TallerDao
 import com.idnp2025b.solucionesmoviles.data.dao.TipoTallerDao
 import com.idnp2025b.solucionesmoviles.repository.Repository
 import dagger.Module
@@ -42,14 +43,19 @@ object AppModule {
         db.tipoTallerDao()
 
     @Provides
+    fun provideTallerDao(db: AppDatabase): TallerDao =
+        db.tallerDao()
+    @Provides
     @Singleton
     fun provideRepository(
         plantaDao: PlantaDao,
         departamentoDao: DepartamentoDao,
-        tipoTallerDao: TipoTallerDao
+        tipoTallerDao: TipoTallerDao,
+        tallerDao: TallerDao
     ): Repository = Repository(
         plantaDao,
         departamentoDao,
-        tipoTallerDao
+        tipoTallerDao,
+        tallerDao
     )
 }

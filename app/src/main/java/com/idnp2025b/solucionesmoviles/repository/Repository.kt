@@ -2,9 +2,12 @@ package com.idnp2025b.solucionesmoviles.repository
 
 import com.idnp2025b.solucionesmoviles.data.dao.DepartamentoDao
 import com.idnp2025b.solucionesmoviles.data.dao.PlantaDao
+import com.idnp2025b.solucionesmoviles.data.dao.TallerDao
 import com.idnp2025b.solucionesmoviles.data.dao.TipoTallerDao
 import com.idnp2025b.solucionesmoviles.data.entities.Departamento
 import com.idnp2025b.solucionesmoviles.data.entities.Planta
+import com.idnp2025b.solucionesmoviles.data.entities.Taller
+import com.idnp2025b.solucionesmoviles.data.entities.TallerConDetalles
 import com.idnp2025b.solucionesmoviles.data.entities.TipoTaller
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -12,7 +15,8 @@ import javax.inject.Inject
 class Repository @Inject constructor(
     private val plantaDao: PlantaDao,
     private val departamentoDao: DepartamentoDao,
-    private val tipoTallerDao: TipoTallerDao
+    private val tipoTallerDao: TipoTallerDao,
+    private val tallerDao: TallerDao
 ){
     // --- METODOS DE PLANTA ---
     suspend fun insertarPlanta(planta: Planta) {
@@ -142,5 +146,60 @@ class Repository @Inject constructor(
     }
     fun getTipoTaller(codTipTal: Int): Flow<TipoTaller?> {
         return tipoTallerDao.getTipoTaller(codTipTal)
+    }
+    // --- MÉTODOS DE TALLER (NUEVOS) ---
+
+    suspend fun insertarTaller(taller: Taller) {
+        tallerDao.insertarTaller(taller)
+    }
+
+    suspend fun updateTaller(taller: Taller) {
+        tallerDao.updateTaller(taller)
+    }
+
+    suspend fun activarTaller(codTal: Int) {
+        tallerDao.activarTaller(codTal)
+    }
+
+    suspend fun inactivarTaller(codTal: Int) {
+        tallerDao.inactivarTaller(codTal)
+    }
+
+    suspend fun deleteTaller(taller: Taller) {
+        tallerDao.deleteTaller(taller)
+    }
+
+    suspend fun eliminarLogicoTaller(codTal: Int) {
+        tallerDao.eliminarLogicoTaller(codTal)
+    }
+
+    // Para leer usamos la Relación Completa (TallerConDetalles)
+    fun getTalleresTodas(): Flow<List<TallerConDetalles>> {
+        return tallerDao.getTalleresTodas()
+    }
+
+    fun getTalleresActivas(): Flow<List<TallerConDetalles>> {
+        return tallerDao.getTalleresActivas()
+    }
+
+    fun getTalleresInactivas(): Flow<List<TallerConDetalles>> {
+        return tallerDao.getTalleresInactivas()
+    }
+
+    fun getTalleresEliminadas(): Flow<List<TallerConDetalles>> {
+        return tallerDao.getTalleresEliminadas()
+    }
+
+    fun getTaller(codTal: Int): Flow<TallerConDetalles?> {
+        return tallerDao.getTaller(codTal)
+    }
+
+    // Filtros especiales
+    fun getTalleresPorPlanta(codPla: Int): Flow<List<TallerConDetalles>> {
+        return tallerDao.getTalleresPorPlanta(codPla)
+    }
+
+    fun getTalleresPorDepartamento(codDep: Int): Flow<List<TallerConDetalles>> {
+        return tallerDao.getTalleresPorDepartamento(codDep)
     }
 }
