@@ -30,9 +30,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.idnp2025b.solucionesmoviles.data.SessionManager
 import com.idnp2025b.solucionesmoviles.ui.screens.planta.EditarPlanta
 import com.idnp2025b.solucionesmoviles.ui.screens.Home
 import com.idnp2025b.solucionesmoviles.ui.screens.departamento.CrearDepartamento
@@ -53,9 +55,13 @@ import com.idnp2025b.solucionesmoviles.ui.theme.miEstiloTopBar
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    var usuarioActual by remember { mutableStateOf<String?>(null) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    var usuarioActual by remember { mutableStateOf(sessionManager.obtenerUsuario()) }
+    val startRoute = if (usuarioActual != null) "home" else "login"
 
     val currentScreenTitle = when {
         currentDestination?.route == "login" -> "Inicio de sesion"
@@ -123,13 +129,14 @@ fun MainScreen() {
         // Aquí se definen TODAS las rutas de la App
         NavHost(
             navController = navController,
-            startDestination = "home", //pantalla inicial
+            startDestination = startRoute, //pantalla inicial
             modifier = Modifier.padding(paddingValues)
         ) {
             composable("login") {
                 Login(
                     navController = navController,
                     onLoginSuccess = { nuevoUsuario ->
+                        sessionManager.guardarUsuario(nuevoUsuario)
                         usuarioActual = nuevoUsuario
                     }
                 )
@@ -140,6 +147,7 @@ fun MainScreen() {
                     Home(
                         navController = navController,
                         onLogout = {
+                            sessionManager.borrarSesion()
                             usuarioActual = null
                             navController.navigate("login") {
                                 popUpTo(0) { inclusive = true }
