@@ -68,4 +68,19 @@ interface TallerDao {
     @Transaction
     @Query("SELECT * FROM taller WHERE codDep = :codDep AND estTal = 'A' ORDER BY nomTal ASC")
     fun getTalleresPorDepartamento(codDep: Int): Flow<List<TallerConDetalles>>
+
+    @Query("""
+    SELECT SUM(total) FROM (
+        SELECT COUNT(*) AS total FROM plantas
+        UNION ALL
+        SELECT COUNT(*) AS total FROM departamento
+        UNION ALL
+        SELECT COUNT(*) AS total FROM tipo_taller
+        UNION ALL
+        SELECT COUNT(*) AS total FROM taller
+    )
+""")
+    suspend fun contarTotalRegistros(): Int
+    @Query("DELETE FROM sqlite_sequence")
+    suspend fun resetIds()
 }

@@ -1,5 +1,7 @@
 package com.idnp2025b.solucionesmoviles.repository
 
+import androidx.room.withTransaction
+import com.idnp2025b.solucionesmoviles.data.AppDatabase
 import com.idnp2025b.solucionesmoviles.data.dao.DepartamentoDao
 import com.idnp2025b.solucionesmoviles.data.dao.PlantaDao
 import com.idnp2025b.solucionesmoviles.data.dao.TallerDao
@@ -9,10 +11,13 @@ import com.idnp2025b.solucionesmoviles.data.entities.Planta
 import com.idnp2025b.solucionesmoviles.data.entities.Taller
 import com.idnp2025b.solucionesmoviles.data.entities.TallerConDetalles
 import com.idnp2025b.solucionesmoviles.data.entities.TipoTaller
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class Repository @Inject constructor(
+    private val db: AppDatabase,
     private val plantaDao: PlantaDao,
     private val departamentoDao: DepartamentoDao,
     private val tipoTallerDao: TipoTallerDao,
@@ -201,5 +206,111 @@ class Repository @Inject constructor(
 
     fun getTalleresPorDepartamento(codDep: Int): Flow<List<TallerConDetalles>> {
         return tallerDao.getTalleresPorDepartamento(codDep)
+    }
+
+    // Acciones especiales
+    // En Repository.kt
+
+    suspend fun insertarDatosDePrueba(): Boolean {
+        val totalRegistros = tallerDao.contarTotalRegistros()
+
+        if (totalRegistros > 0) {
+            return false
+        }
+
+        db.withTransaction {
+            val p1 = Planta(nomPla = "Central", estPla = "A")
+            val p2 = Planta(nomPla = "Costa", estPla = "A")
+            val p3 = Planta(nomPla = "Sierra", estPla = "A")
+            plantaDao.insertarPlanta(p1)
+            plantaDao.insertarPlanta(p2)
+            plantaDao.insertarPlanta(p3)
+
+            val d1 = Departamento(nomDep = "Arequipa", estDep = "A")
+            val d2 = Departamento(nomDep = "Tacna", estDep = "A")
+            val d3 = Departamento(nomDep = "Moquegua", estDep = "A")
+            departamentoDao.insertarDepartamento(d1)
+            departamentoDao.insertarDepartamento(d2)
+            departamentoDao.insertarDepartamento(d3)
+
+            val tt1 = TipoTaller(nomTipTal = "Eléctrico", estTipTal = "A")
+            val tt2 = TipoTaller(nomTipTal = "Mecánico", estTipTal = "A")
+            val tt3 = TipoTaller(nomTipTal = "Pintura", estTipTal = "A")
+            val tt4 = TipoTaller(nomTipTal = "Automotriz", estTipTal = "A")
+            val tt5 = TipoTaller(nomTipTal = "Soldadura", estTipTal = "A")
+            tipoTallerDao.insertarTipoTaller(tt1)
+            tipoTallerDao.insertarTipoTaller(tt2)
+            tipoTallerDao.insertarTipoTaller(tt3)
+            tipoTallerDao.insertarTipoTaller(tt4)
+            tipoTallerDao.insertarTipoTaller(tt5)
+
+            val taller1 = Taller(
+                nomTal = "Mantenimiento General",
+                codPla = 1,    // Central
+                codDep = 1,    // Arequipa
+                codTipTal = 2, // Mecánico
+                estTal = "A"
+            )
+
+            val taller2 = Taller(
+                nomTal = "Electro Arequipa",
+                codPla = 1,    // Central
+                codDep = 1,    // Arequipa
+                codTipTal = 1, // Eléctrico
+                estTal = "A"
+            )
+
+            val taller3 = Taller(
+                nomTal = "Pintura Tacna",
+                codPla = 2,    // Costa
+                codDep = 2,    // Tacna
+                codTipTal = 3, // Pintura
+                estTal = "A"
+            )
+
+            val taller4 = Taller(
+                nomTal = "Servicio Automotriz Moquegua",
+                codPla = 3,    // Sierra
+                codDep = 3,    // Moquegua
+                codTipTal = 4, // Automotriz
+                estTal = "A"
+            )
+
+            val taller5 = Taller(
+                nomTal = "Soldadura Costa",
+                codPla = 2,    // Costa
+                codDep = 1,    // Arequipa
+                codTipTal = 5, // Soldadura
+                estTal = "A"
+            )
+
+            val taller6 = Taller(
+                nomTal = "Soporte Técnico Central",
+                codPla = 1,    // Central
+                codDep = 2,    // Tacna
+                codTipTal = 1, // Eléctrico
+                estTal = "A"
+            )
+
+            tallerDao.insertarTaller(taller1)
+            tallerDao.insertarTaller(taller2)
+            tallerDao.insertarTaller(taller3)
+            tallerDao.insertarTaller(taller4)
+            tallerDao.insertarTaller(taller5)
+            tallerDao.insertarTaller(taller6)
+        }
+        return true
+    }
+    suspend fun borrarBaseDeDatosCompleta() {
+        withContext(Dispatchers.IO) {
+            db.clearAllTables()
+            tallerDao.resetIds()
+        }
+    }
+    suspend fun esBaseDeDatosVacia(): Boolean {
+        return withContext(Dispatchers.IO) {
+            val cantidad = tallerDao.contarTotalRegistros()
+            cantidad == 0
+        }
     }
 }

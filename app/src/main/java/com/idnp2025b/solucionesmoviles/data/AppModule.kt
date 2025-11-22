@@ -48,11 +48,13 @@ object AppModule {
     @Provides
     @Singleton
     fun provideRepository(
+        db: AppDatabase,
         plantaDao: PlantaDao,
         departamentoDao: DepartamentoDao,
         tipoTallerDao: TipoTallerDao,
         tallerDao: TallerDao
     ): Repository = Repository(
+        db,
         plantaDao,
         departamentoDao,
         tipoTallerDao,

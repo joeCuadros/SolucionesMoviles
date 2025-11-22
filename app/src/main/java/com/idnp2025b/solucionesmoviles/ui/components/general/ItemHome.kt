@@ -45,7 +45,7 @@ fun ItemHome(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Gestión de\n${menuItem.titulo}",
+                text = menuItem.titulo,
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
