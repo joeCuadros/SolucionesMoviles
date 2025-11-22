@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
@@ -65,7 +66,7 @@ fun Buscador(
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             ) {
-                Icon(Icons.Default.Sort, contentDescription = "Filtrar por")
+                Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Filtrar por")
             }
 
             DropdownMenu(
@@ -79,7 +80,7 @@ fun Buscador(
                         menuExpandido = false
                     },
                     leadingIcon = {
-                        if (criterioOrden == CriterioOrden.NOMBRE) Icon(Icons.Default.KeyboardArrowUp, null) // Marca visual
+                        if (criterioOrden == CriterioOrden.NOMBRE) Icon(Icons.Default.KeyboardArrowUp, null)
                     }
                 )
                 DropdownMenuItem(
@@ -100,8 +101,10 @@ fun Buscador(
             checked = ascendente,
             onCheckedChange = onOrdenChange,
             colors = IconButtonDefaults.filledIconToggleButtonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                checkedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                checkedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         ) {
             if (ascendente) {

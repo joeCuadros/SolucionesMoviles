@@ -2,6 +2,7 @@ package com.idnp2025b.solucionesmoviles.ui.screens.taller
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -88,11 +89,9 @@ fun EditarTaller(
         }
     } else {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             Text("Editar Taller", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(24.dp))
