@@ -30,6 +30,8 @@ import com.idnp2025b.solucionesmoviles.ui.screens.planta.Planta
 import com.idnp2025b.solucionesmoviles.ui.screens.taller.CrearTaller
 import com.idnp2025b.solucionesmoviles.ui.screens.taller.EditarTaller
 import com.idnp2025b.solucionesmoviles.ui.screens.taller.Taller
+import com.idnp2025b.solucionesmoviles.ui.screens.tipotaller.CrearTipoTaller
+import com.idnp2025b.solucionesmoviles.ui.screens.tipotaller.EditarTipoTaller
 import com.idnp2025b.solucionesmoviles.ui.screens.tipotaller.TipoTaller
 import com.idnp2025b.solucionesmoviles.ui.theme.miEstiloTopBar
 
@@ -91,10 +93,6 @@ fun MainScreen() {
             composable("taller") {
                 Taller(navController = navController)
             }
-            // Rutas de tipo de taller
-            composable("tipo_taller") {
-                TipoTaller(navController = navController)
-            }
             composable("new_taller") {
                 CrearTaller(navController = navController)
             }
@@ -105,6 +103,24 @@ fun MainScreen() {
                 val codTal = backStackEntry.arguments?.getInt("codTal")
                 if (codTal != null) {
                     EditarTaller(navController = navController, codTal = codTal)
+                } else {
+                    navController.popBackStack()
+                }
+            }
+            // Rutas de tipo de taller
+            composable("tipo_taller") {
+                TipoTaller(navController = navController)
+            }
+            composable("new_tipo_taller") {
+                CrearTipoTaller(navController = navController)
+            }
+            composable(
+                route = "edit_tipo_taller/{codTipTal}",
+                arguments = listOf(navArgument("codTipTal") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val codTipTal = backStackEntry.arguments?.getInt("codTipTal")
+                if (codTipTal != null) {
+                    EditarTipoTaller(navController = navController, codTipTal = codTipTal)
                 } else {
                     navController.popBackStack()
                 }

@@ -9,8 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -37,12 +41,14 @@ fun EditarPlanta(
     viewModel: PlantaViewModel = hiltViewModel()
 ) {
     var nombrePlanta by remember { mutableStateOf("") }
+    var estadoPlanta by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     val planta by viewModel.obtenerPlanta(codPla).collectAsState(initial = null)
 
     LaunchedEffect(planta) {
         planta?.let {
-            nombrePlanta = it.nomPla // Rellena el TextField con el nombre actual
+            nombrePlanta = it.nomPla
+            estadoPlanta = it.estPla
         }
     }
 
@@ -60,14 +66,17 @@ fun EditarPlanta(
             CircularProgressIndicator()
         }
     } else {
-        // Cuando la planta ya cargó, mostramos el formulario
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Editar Planta", style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(24.dp))
+            Text(
+                text = "Editar Planta",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.height(32.dp))
 
             // Campo de Código (no editable)
             OutlinedTextField(
@@ -81,23 +90,35 @@ fun EditarPlanta(
 
             Spacer(Modifier.height(16.dp))
 
+            // Campo de Nombre (editable)
             OutlinedTextField(
                 value = nombrePlanta,
                 onValueChange = { nombrePlanta = it },
-                label = { Text("Nombre de la planta") },
+                label = { Text("Nombre") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                enabled = uiState !is UiState.Loading // Se deshabilita al "guardar"
+                enabled = uiState !is UiState.Loading
+            )
+            Spacer(Modifier.height(16.dp))
+
+            // Campo de estado (no editable)
+            OutlinedTextField(
+                value = estadoPlanta,
+                onValueChange = {},
+                label = { Text("Estado") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                enabled = false
             )
 
-            Spacer(Modifier.height(16.dp))
             // boton de actualizar
             Button(
                 onClick = {
-                    if (nombrePlanta.isNotBlank()) {
+                    val nombreLimpio = nombrePlanta.trim()
+                    if (nombreLimpio.isNotBlank()) {
                         planta?.let { plantaOriginal ->
                             val plantaActualizada = plantaOriginal.copy(
-                                nomPla = nombrePlanta
+                                nomPla = nombreLimpio
                             )
                             viewModel.actualizarPlanta(plantaActualizada) //actualizar
                         }
@@ -109,11 +130,15 @@ fun EditarPlanta(
                 if (uiState is UiState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Actualizar Cambios")
+                    Icon(
+                        imageVector = Icons.Default.Save,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("GUARDAR", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

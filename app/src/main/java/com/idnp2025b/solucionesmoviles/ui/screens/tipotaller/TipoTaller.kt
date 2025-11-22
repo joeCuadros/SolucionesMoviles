@@ -12,15 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +30,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.idnp2025b.solucionesmoviles.ui.components.general.BotonFlotante
+import com.idnp2025b.solucionesmoviles.ui.components.general.Buscador
 import com.idnp2025b.solucionesmoviles.ui.components.tipotaller.TipoTallerItem
 import com.idnp2025b.solucionesmoviles.viewmodel.FiltroTipoTaller
 import com.idnp2025b.solucionesmoviles.viewmodel.TipoTallerViewModel
@@ -42,7 +39,8 @@ import com.idnp2025b.solucionesmoviles.viewmodel.UiState
 
 @Composable
 fun TipoTaller(
-    navController: NavController, viewModel: TipoTallerViewModel = hiltViewModel()
+    navController: NavController,
+    viewModel: TipoTallerViewModel = hiltViewModel()
 ) {
     val tipoTalleres by viewModel.tipoTalleres.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
@@ -66,111 +64,92 @@ fun TipoTaller(
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Filtros de estado
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            FilterChip(
-                selected = filtroActual == FiltroTipoTaller.TODAS,
-                onClick = { viewModel.cargarTipoTalleres(FiltroTipoTaller.TODAS) },
-                label = { Text("Todos") }
+    Scaffold(
+        floatingActionButton = {
+            BotonFlotante(
+                onClick = { navController.navigate("new_tipo_taller") },
+                contentDescription = "Nuevo Tipo de Taller"
             )
-            FilterChip(
-                selected = filtroActual == FiltroTipoTaller.ACTIVAS,
-                onClick = { viewModel.cargarTipoTalleres(FiltroTipoTaller.ACTIVAS) },
-                label = { Text("Activos") }
-            )
-            FilterChip(
-                selected = filtroActual == FiltroTipoTaller.INACTIVAS,
-                onClick = { viewModel.cargarTipoTalleres(FiltroTipoTaller.INACTIVAS) },
-                label = { Text("Inactivos") }
-            )
-            FilterChip(
-                selected = filtroActual == FiltroTipoTaller.ELIMINADAS,
-                onClick = { viewModel.cargarTipoTalleres(FiltroTipoTaller.ELIMINADAS) },
-                label = { Text("Eliminados") }
-            )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
 
-        // Fila para Buscador y Orden
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxSize()
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("Buscar por nombre...") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                trailingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") }
-            )
-            IconToggleButton(
-                checked = ascendente,
-                onCheckedChange = { ascendente = !ascendente }
+            // FILTROS DE ESTADO
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                if (ascendente) {
-                    Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Orden Ascendente")
-                } else {
-                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Orden Descendente")
-                }
-            }
-        }
-
-        val tipoTalleresProcesados = remember(tipoTalleres, searchQuery, ascendente) {
-            tipoTalleres
-                .filter { tt ->
-                    tt.nomTipTal.contains(searchQuery, ignoreCase = true)
-                }
-                .let { filtradas ->
-                    if (ascendente) {
-                        filtradas.sortedBy { it.nomTipTal }
-                    } else {
-                        filtradas.sortedByDescending { it.nomTipTal }
-                    }
-                }
-        }
-
-        // Lista de tipo de talleres
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(tipoTalleresProcesados) { tipoTaller ->
-                TipoTallerItem (
-                    tipoTaller = tipoTaller,
-                    onActivar = { viewModel.activarTipoTaller(it) },
-                    onInactivar = { viewModel.inactivarTipoTaller(it) },
-                    onEliminar = { viewModel.eliminarLogicoTipoTaller(it) },
-                    onEliminarFisico = { viewModel.deleteTipoTaller(tipoTaller) },
-                    onEditar = { navController.navigate("edit_tipo_taller/${tipoTaller.codTipTal}")}
+                val chips = listOf(
+                    Pair(FiltroTipoTaller.TODAS, "Todos"),
+                    Pair(FiltroTipoTaller.ACTIVAS, "Activos"),
+                    Pair(FiltroTipoTaller.INACTIVAS, "Inactivos"),
+                    Pair(FiltroTipoTaller.ELIMINADAS, "Papelera")
                 )
+                chips.forEach { (filtro, label) ->
+                    FilterChip(
+                        selected = filtroActual == filtro,
+                        onClick = { viewModel.cargarTipoTalleres(filtro) },
+                        label = { Text(label) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+                }
             }
-        }
 
-        Spacer(Modifier.height(8.dp))
+            // BUSCADOR REUTILIZABLE
+            Buscador(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+                ascendente = ascendente,
+                onOrdenChange = { ascendente = it },
+                placeHolder = "Buscar tipo de taller..."
+            )
 
-        // Botón agregar
-        Button(
-            onClick = { navController.navigate("new_tipo_taller") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text("Agregar nuevo Tipo de Taller")
+            // Lógica de ordenamiento y filtrado local
+            val tipoTalleresProcesados = remember(tipoTalleres, searchQuery, ascendente) {
+                tipoTalleres
+                    .filter { tt ->
+                        tt.nomTipTal.contains(searchQuery, ignoreCase = true)
+                    }
+                    .let { filtradas ->
+                        if (ascendente) filtradas.sortedBy { it.nomTipTal }
+                        else filtradas.sortedByDescending { it.nomTipTal }
+                    }
+            }
+
+            // LISTA DE TIPO DE TALLERES
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(tipoTalleresProcesados) { tipoTaller ->
+                    TipoTallerItem(
+                        tipoTaller = tipoTaller,
+                        onActivar = { viewModel.activarTipoTaller(it) },
+                        onInactivar = { viewModel.inactivarTipoTaller(it) },
+                        onEliminar = { viewModel.eliminarLogicoTipoTaller(it) },
+                        onEliminarFisico = { viewModel.deleteTipoTaller(tipoTaller) },
+                        onEditar = { navController.navigate("edit_tipo_taller/${tipoTaller.codTipTal}") }
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
+            }
         }
     }
 }

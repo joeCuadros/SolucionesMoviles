@@ -9,8 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -37,12 +41,14 @@ fun EditarTipoTaller(
     viewModel: TipoTallerViewModel = hiltViewModel()
 ) {
     var nombreTipoTaller by remember { mutableStateOf("") }
+    var estadoTipoTaller by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     val tipoTaller by viewModel.obtenerTipoTaller(codTipTal).collectAsState(initial = null)
 
     LaunchedEffect(tipoTaller) {
         tipoTaller?.let {
-            nombreTipoTaller = it.nomTipTal // Rellena el TextField con el nombre actual
+            nombreTipoTaller = it.nomTipTal
+            estadoTipoTaller = it.estTipTal
         }
     }
 
@@ -65,8 +71,12 @@ fun EditarTipoTaller(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Editar Tipo de Taller", style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(24.dp))
+            Text(
+                text = "Editar Tipo de Taller",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.height(32.dp))
 
             // Campo de Código (no editable)
             OutlinedTextField(
@@ -84,20 +94,30 @@ fun EditarTipoTaller(
             OutlinedTextField(
                 value = nombreTipoTaller,
                 onValueChange = { nombreTipoTaller = it },
-                label = { Text("Nombre del Tipo de Taller") },
+                label = { Text("Nombre") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 enabled = uiState !is UiState.Loading
             )
-
             Spacer(Modifier.height(16.dp))
+
+            // Campo de estado (no editable)
+            OutlinedTextField(
+                value = estadoTipoTaller,
+                onValueChange = {},
+                label = { Text("Estado") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                enabled = false
+            )
 
             Button(
                 onClick = {
-                    if (nombreTipoTaller.isNotBlank()) {
+                    val nombreLimpio = nombreTipoTaller.trim()
+                    if (nombreLimpio.isNotBlank()) {
                         tipoTaller?.let { ttOriginal ->
                             val ttActualizado = ttOriginal.copy(
-                                nomTipTal = nombreTipoTaller
+                                nomTipTal = nombreLimpio
                             )
                             viewModel.actualizarTipoTaller(ttActualizado)
                         }
@@ -109,11 +129,15 @@ fun EditarTipoTaller(
                 if (uiState is UiState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Actualizar Cambios")
+                    Icon(
+                        imageVector = Icons.Default.Save,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("GUARDAR", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

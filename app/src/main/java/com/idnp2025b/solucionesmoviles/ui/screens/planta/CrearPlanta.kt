@@ -8,8 +8,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -43,41 +48,63 @@ fun CrearPlanta(
     )
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
-        Text("Formulario de nueva Planta", style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(24.dp))
+        Text(
+            text = "Nueva Planta",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.height(32.dp))
 
+        // imputs
         OutlinedTextField(
             value = nombrePlanta,
             onValueChange = { nombrePlanta = it },
-            label = { Text("Nombre de la planta") },
+            label = { Text("Nombre") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            shape = RoundedCornerShape(12.dp),
             enabled = uiState !is UiState.Loading
         )
 
         Spacer(Modifier.height(16.dp))
 
+        OutlinedTextField(
+            value = "A",
+            onValueChange = {},
+            label = { Text("Estado") },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            enabled = false
+        )
+
+        Spacer(Modifier.height(24.dp))
+        // guardar
         Button(
             onClick = {
-                if (nombrePlanta.isNotBlank()) {
-                    viewModel.agregarPlanta(nombrePlanta)
+                val nombreLimpio = nombrePlanta.trim()
+                if (nombreLimpio.isNotBlank()) {
+                    viewModel.agregarPlanta(nombreLimpio)
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(50.dp),
             enabled = uiState !is UiState.Loading && nombrePlanta.isNotBlank()
         ) {
             if (uiState is UiState.Loading) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    strokeWidth = 2.dp
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("Guardar planta")
+                Icon(
+                    imageVector = Icons.Default.Save,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("GUARDAR", style = MaterialTheme.typography.titleMedium)
             }
         }
     }

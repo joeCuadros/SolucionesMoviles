@@ -12,15 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +30,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.idnp2025b.solucionesmoviles.ui.components.general.BotonFlotante
+import com.idnp2025b.solucionesmoviles.ui.components.general.Buscador
 import com.idnp2025b.solucionesmoviles.ui.components.planta.PlantaItem
 import com.idnp2025b.solucionesmoviles.viewmodel.FiltroPlanta
 import com.idnp2025b.solucionesmoviles.viewmodel.PlantaViewModel
@@ -42,14 +39,14 @@ import com.idnp2025b.solucionesmoviles.viewmodel.UiState
 
 @Composable
 fun Planta(
-    navController: NavController, viewModel: PlantaViewModel = hiltViewModel()
+    navController: NavController,
+    viewModel: PlantaViewModel = hiltViewModel()
 ) {
     val plantas by viewModel.plantas.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val filtroActual by viewModel.filtroActual.collectAsState()
     val context = LocalContext.current
 
-    // --- 1. ESTADOS PARA LOS NUEVOS CONTROLES ---
     var searchQuery by remember { mutableStateOf("") }
     var ascendente by remember { mutableStateOf(true) }
 
@@ -67,118 +64,92 @@ fun Planta(
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Filtros de estado (sin cambios)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            FilterChip(
-                selected = filtroActual == FiltroPlanta.TODAS,
-                onClick = { viewModel.cargarPlantas(FiltroPlanta.TODAS) },
-                label = { Text("Todas") }
+    Scaffold(
+        floatingActionButton = {
+            BotonFlotante(
+                onClick = { navController.navigate("new_planta") },
+                contentDescription = "Nueva Planta"
             )
-            FilterChip(
-                selected = filtroActual == FiltroPlanta.ACTIVAS,
-                onClick = { viewModel.cargarPlantas(FiltroPlanta.ACTIVAS) },
-                label = { Text("Activas") }
-            )
-            FilterChip(
-                selected = filtroActual == FiltroPlanta.INACTIVAS,
-                onClick = { viewModel.cargarPlantas(FiltroPlanta.INACTIVAS) },
-                label = { Text("Inactivas") }
-            )
-            FilterChip(
-                selected = filtroActual == FiltroPlanta.ELIMINADAS,
-                onClick = { viewModel.cargarPlantas(FiltroPlanta.ELIMINADAS) },
-                label = { Text("Eliminadas") }
-            )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
 
-        // --- 2. NUEVA FILA PARA BUSCADOR Y ORDEN ---
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxSize()
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Buscador
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("Buscar por nombre...") },
-                modifier = Modifier.weight(1f), // Ocupa el espacio disponible
-                singleLine = true,
-                trailingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") }
-            )
-
-            // Botón de Orden
-            IconToggleButton(
-                checked = ascendente,
-                onCheckedChange = { ascendente = !ascendente } // Invierte el valor
+            // FILTROS DE ESTADO
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                if (ascendente) {
-                    Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Orden Ascendente")
-                } else {
-                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Orden Descendente")
-                }
-            }
-        }
-
-        // --- 3. LÓGICA DE FILTRADO Y ORDEN ---
-        val plantasProcesadas = remember(plantas, searchQuery, ascendente) {
-            plantas
-                // Primero filtramos por la búsqueda
-                .filter { planta ->
-                    planta.nomPla.contains(searchQuery, ignoreCase = true)
-                }
-                // Luego ordenamos
-                .let { filtradas ->
-                    if (ascendente) {
-                        filtradas.sortedBy { it.nomPla }
-                    } else {
-                        filtradas.sortedByDescending { it.nomPla }
-                    }
-                }
-        }
-
-        // --- 4. LISTA DE PLANTAS (MODIFICADA) ---
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Usamos la lista procesada
-            items(plantasProcesadas) { planta ->
-                PlantaItem (
-                    planta = planta,
-                    onActivar = { viewModel.activarPlanta(it) },
-                    onInactivar = { viewModel.inactivarPlanta(it) },
-                    onEliminar = { viewModel.eliminarLogicoPlanta(it) },
-                    onEliminarFisico = { viewModel.deletePlanta(it) },
-                    onEditar = { navController.navigate("edit_planta/${planta.codPla}")}
+                val chips = listOf(
+                    Pair(FiltroPlanta.TODAS, "Todas"),
+                    Pair(FiltroPlanta.ACTIVAS, "Activas"),
+                    Pair(FiltroPlanta.INACTIVAS, "Inactivas"),
+                    Pair(FiltroPlanta.ELIMINADAS, "Papelera")
                 )
+                chips.forEach { (filtro, label) ->
+                    FilterChip(
+                        selected = filtroActual == filtro,
+                        onClick = { viewModel.cargarPlantas(filtro) },
+                        label = { Text(label) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+                }
             }
-        }
 
-        Spacer(Modifier.height(8.dp))
+            // BUSCADOR REUTILIZABLE
+            Buscador(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+                ascendente = ascendente,
+                onOrdenChange = { ascendente = it },
+                placeHolder = "Buscar planta..."
+            )
 
-        // Botón agregar (sin cambios)
-        Button(
-            onClick = { navController.navigate("new_planta") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text("Agregar nueva planta")
+            // Lógica de ordenamiento y filtrado local
+            val plantasProcesadas = remember(plantas, searchQuery, ascendente) {
+                plantas
+                    .filter { planta ->
+                        planta.nomPla.contains(searchQuery, ignoreCase = true)
+                    }
+                    .let { filtradas ->
+                        if (ascendente) filtradas.sortedBy { it.nomPla }
+                        else filtradas.sortedByDescending { it.nomPla }
+                    }
+            }
+
+            // LISTA DE PLANTAS
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(plantasProcesadas) { planta ->
+                    PlantaItem(
+                        planta = planta,
+                        onActivar = { viewModel.activarPlanta(it) },
+                        onInactivar = { viewModel.inactivarPlanta(it) },
+                        onEliminar = { viewModel.eliminarLogicoPlanta(it) },
+                        onEliminarFisico = { viewModel.deletePlanta(it) },
+                        onEditar = { navController.navigate("edit_planta/${planta.codPla}") }
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
+            }
         }
     }
 }

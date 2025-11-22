@@ -21,7 +21,7 @@ fun DialogoEliminar(
     val mensaje = if (esPermanente) {
         "Estás a punto de borrar '$nombreItem' de la base de datos. Esta acción NO se puede deshacer. ¿Continuar?"
     } else {
-        "'$nombreItem' pasará a la lista de eliminados. Podrás restaurarlo más tarde si lo necesitas."
+        "'$nombreItem' pasará a la papelera. Podrás restaurarlo más tarde si lo necesitas."
     }
     val textoBoton = if (esPermanente) "Eliminar definitivamente" else "Eliminar"
 
