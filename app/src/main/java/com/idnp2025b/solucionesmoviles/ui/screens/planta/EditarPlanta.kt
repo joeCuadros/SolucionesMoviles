@@ -133,10 +133,7 @@ fun EditarPlanta(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Icon(
-                        imageVector = Icons.Default.Save,
-                        contentDescription = null
-                    )
+                    Icon(imageVector = Icons.Default.Save, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("GUARDAR", style = MaterialTheme.typography.titleMedium)
                 }

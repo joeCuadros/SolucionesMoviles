@@ -1,4 +1,4 @@
-package com.idnp2025b.solucionesmoviles.ui.components.general
+package com.idnp2025b.solucionesmoviles.ui.components.taller
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -7,44 +7,37 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-// 1. ACTUALIZAMOS EL ENUM PARA QUE TENGA ETIQUETAS (LABEL)
-// Así podemos reciclar el texto y no usar un 'when' gigante.
-enum class CriterioOrden(val label: String) {
-    NOMBRE("Ordenar por Nombre"),
-    CODIGO("Ordenar por Código")
-}
-
 @Composable
-fun Buscador(
+fun BuscadorTaller(
     query: String,
     onQueryChange: (String) -> Unit,
     ascendente: Boolean,
     onOrdenChange: (Boolean) -> Unit,
-    criterioOrden: CriterioOrden,
-    onCriterioChange: (CriterioOrden) -> Unit,
-    placeHolder: String = "Buscar..."
+    criterioOrden: CriterioOrdenTaller,
+    onCriterioChange: (CriterioOrdenTaller) -> Unit,
+    placeHolder: String = "Buscar taller..."
 ) {
     var menuExpandido by remember { mutableStateOf(false) }
 
-    // CAMBIO DE DISEÑO: Usamos Column para que el buscador esté arriba completo
+    // CAMBIO PRINCIPAL: Usamos Column para apilar elementos
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-
-        // --- 1. BUSCADOR (ARRIBA, ANCHO COMPLETO) ---
+        // 1. CAMPO DE TEXTO (Arriba, ancho completo)
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
             placeholder = { Text(placeHolder) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(), // Ocupa todo el ancho
             singleLine = true,
             shape = CircleShape,
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
@@ -58,28 +51,24 @@ fun Buscador(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // --- 2. FILA DE CONTROLES (ABAJO) ---
+        // 2. FILA DE CONTROLES (Abajo: Filtro + Flecha)
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
-            // A. BOTÓN DE FILTRO (OCUPA EL ESPACIO DISPONIBLE)
+            // A. BOTÓN DE CRITERIO (Ocupa el espacio sobrante para que se vea bien el texto)
             Box(modifier = Modifier.weight(1f)) {
                 FilledTonalButton(
                     onClick = { menuExpandido = true },
-                    modifier = Modifier.fillMaxWidth(), // Rellena el ancho
+                    modifier = Modifier.fillMaxWidth(), // Rellena el espacio
                     colors = ButtonDefaults.filledTonalButtonColors(
-                        // MANTENEMOS TUS COLORES ORIGINALES
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    contentPadding = PaddingValues(horizontal = 12.dp)
+                    )
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Filtrar")
+                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-
                     Text(
                         text = criterioOrden.label,
                         style = MaterialTheme.typography.labelLarge
@@ -90,9 +79,9 @@ fun Buscador(
                     expanded = menuExpandido,
                     onDismissRequest = { menuExpandido = false }
                 ) {
-                    CriterioOrden.entries.forEach { opcion ->
+                    CriterioOrdenTaller.entries.forEach { opcion ->
                         DropdownMenuItem(
-                            text = { Text(opcion.label) }, // Usa el label del Enum
+                            text = { Text(opcion.label) },
                             onClick = {
                                 onCriterioChange(opcion)
                                 menuExpandido = false
@@ -107,12 +96,13 @@ fun Buscador(
                 }
             }
 
+            // B. BOTÓN ASCENDENTE/DESCENDENTE (Cuadrado/Fijo a la derecha)
             FilledIconToggleButton(
                 checked = ascendente,
                 onCheckedChange = onOrdenChange,
                 colors = IconButtonDefaults.filledIconToggleButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     checkedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     checkedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )

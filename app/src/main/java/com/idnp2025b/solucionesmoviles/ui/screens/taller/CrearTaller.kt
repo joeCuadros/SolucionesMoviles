@@ -2,6 +2,10 @@ package com.idnp2025b.solucionesmoviles.ui.screens.taller
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,7 +17,7 @@ import androidx.navigation.NavController
 import com.idnp2025b.solucionesmoviles.data.entities.Departamento
 import com.idnp2025b.solucionesmoviles.data.entities.Planta
 import com.idnp2025b.solucionesmoviles.data.entities.TipoTaller
-import com.idnp2025b.solucionesmoviles.ui.components.general.Selector // Importa tu componente
+import com.idnp2025b.solucionesmoviles.ui.components.general.Selector
 import com.idnp2025b.solucionesmoviles.viewmodel.*
 
 @Composable
@@ -24,13 +28,11 @@ fun CrearTaller(
     deptoViewModel: DepartamentoViewModel = hiltViewModel(),
     tipoViewModel: TipoTallerViewModel = hiltViewModel()
 ) {
-    // Estados del formulario
     var nombreTaller by remember { mutableStateOf("") }
     var selectedPlanta by remember { mutableStateOf<Planta?>(null) }
     var selectedDepto by remember { mutableStateOf<Departamento?>(null) }
     var selectedTipo by remember { mutableStateOf<TipoTaller?>(null) }
 
-    // Estados de datos (Listas para los selectores)
     val plantas by plantaViewModel.plantas.collectAsState()
     val deptos by deptoViewModel.departamentos.collectAsState()
     val tipos by tipoViewModel.tipoTalleres.collectAsState()
@@ -38,14 +40,12 @@ fun CrearTaller(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    // Cargar las listas al iniciar la pantalla (Solo activos preferiblemente)
     LaunchedEffect(Unit) {
         plantaViewModel.cargarPlantas(FiltroPlanta.ACTIVAS)
         deptoViewModel.cargarDepartamentos(FiltroDepartamento.ACTIVAS)
         tipoViewModel.cargarTipoTalleres(FiltroTipoTaller.ACTIVAS)
     }
 
-    // Manejo de respuesta (Guardado exitoso o Error)
     LaunchedEffect(uiState) {
         when(val state = uiState) {
             is UiState.Success -> {
@@ -64,25 +64,32 @@ fun CrearTaller(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
-        Text("Nuevo Taller", style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // Nombre
+        Text(
+            text = "Nuevo Taller",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Spacer(Modifier.height(32.dp))
+
         OutlinedTextField(
             value = nombreTaller,
             onValueChange = { nombreTaller = it },
             label = { Text("Nombre del Taller") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            enabled = uiState !is UiState.Loading
         )
 
         Spacer(Modifier.height(16.dp))
 
-        // Selectores
         Selector(
             label = "Seleccionar Planta",
             options = plantas,
@@ -111,15 +118,26 @@ fun CrearTaller(
             itemLabel = { it.nomTipTal }
         )
 
+        Spacer(Modifier.height(16.dp))
+
+        // AQUI ESTÁ EL CAMPO EXACTO QUE PEDISTE
+        OutlinedTextField(
+            value = "A",
+            onValueChange = {},
+            label = { Text("Estado") },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            enabled = false
+        )
+
         Spacer(Modifier.height(24.dp))
 
-        // Botón Guardar
         Button(
             onClick = {
-                // Validar que nada sea nulo antes de enviar
-                if (nombreTaller.isNotBlank() && selectedPlanta != null && selectedDepto != null && selectedTipo != null) {
+                val nombreLimpio = nombreTaller.trim()
+                if (nombreLimpio.isNotBlank() && selectedPlanta != null && selectedDepto != null && selectedTipo != null) {
                     viewModel.agregarTaller(
-                        nombre = nombreTaller,
+                        nombre = nombreLimpio,
                         codPla = selectedPlanta!!.codPla,
                         codDep = selectedDepto!!.codDep,
                         codTipTal = selectedTipo!!.codTipTal
@@ -128,13 +146,15 @@ fun CrearTaller(
                     Toast.makeText(context, "Complete todos los campos", Toast.LENGTH_SHORT).show()
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(50.dp),
             enabled = uiState !is UiState.Loading
         ) {
             if (uiState is UiState.Loading) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary)
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
             } else {
-                Text("Guardar Taller")
+                Icon(imageVector = Icons.Default.Save, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("GUARDAR", style = MaterialTheme.typography.titleMedium)
             }
         }
     }

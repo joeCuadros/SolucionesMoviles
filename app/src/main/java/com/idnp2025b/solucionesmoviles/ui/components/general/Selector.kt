@@ -1,9 +1,11 @@
 package com.idnp2025b.solucionesmoviles.ui.components.general
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,6 +30,8 @@ fun <T> Selector(
             label = { Text(label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            // MEJORA: Redondeado igual que los otros campos
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth()
