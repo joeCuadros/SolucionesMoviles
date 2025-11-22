@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import com.idnp2025b.solucionesmoviles.ui.navigation.MainScreen
+import com.idnp2025b.solucionesmoviles.ui.theme.SolucionesMovilesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -14,8 +15,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Surface {
-                    MainScreen() //usar pantalla principal
+                SolucionesMovilesTheme {
+                    Surface {
+                        MainScreen() //usar pantalla principal
+                    }
                 }
             }
         }

@@ -5,14 +5,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
     primary = AzulPrimarioDark,
     secondary = AzulSecundarioDark,
     tertiary = CelesteTerciarioDark,
     background = FondoOscuro,
-    surfaceVariant = SurfaceVariantOscuro
+    surfaceVariant = SurfaceVariantOscuro,
+    error = RojoEstado
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -20,7 +21,8 @@ private val LightColorScheme = lightColorScheme(
     secondary = AzulSecundario,
     tertiary = CelesteTerciario,
     background = FondoClaro,
-    surfaceVariant = SurfaceVariantClaro
+    surfaceVariant = SurfaceVariantClaro,
+    error = RojoEstado
 )
 
 @Composable
@@ -35,3 +37,15 @@ fun SolucionesMovilesTheme(
         content = content
     )
 }
+
+val colorVerdeEstado: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) VerdeEstadoDark else VerdeEstado
+
+val colorAmarilloEstado: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) AmarilloEstadoDark else AmarilloEstado
+
+val colorRojoEstado: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) RojoEstadoDark else RojoEstado

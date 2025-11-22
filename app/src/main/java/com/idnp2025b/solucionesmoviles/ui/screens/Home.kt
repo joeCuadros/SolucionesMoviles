@@ -12,7 +12,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.HomeWork
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.MaterialTheme
@@ -36,9 +38,9 @@ fun Home(navController: NavController) {
     // datos iniciales
     val opcionesMenu = listOf(
         MenuItem("Talleres", Icons.Filled.Build, "taller"),
-        MenuItem("Departamentos", Icons.Default.Place, "departamento"),
+        MenuItem("Departamentos", Icons.Default.AccountBox, "departamento"),
         MenuItem("Tipos de Taller", Icons.AutoMirrored.Filled.List, "tipo_taller"),
-        MenuItem("Plantas", Icons.Default.LocationOn, "planta")
+        MenuItem("Plantas", Icons.Default.HomeWork, "planta")
     )
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp)

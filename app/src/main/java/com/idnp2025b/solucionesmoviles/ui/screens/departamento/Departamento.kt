@@ -12,15 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,13 +31,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.idnp2025b.solucionesmoviles.ui.components.departamento.DepartamentoItem
-import com.idnp2025b.solucionesmoviles.viewmodel.FiltroDepartamento
+import com.idnp2025b.solucionesmoviles.ui.components.general.BotonFlotante
+import com.idnp2025b.solucionesmoviles.ui.components.general.Buscador
 import com.idnp2025b.solucionesmoviles.viewmodel.DepartamentoViewModel
+import com.idnp2025b.solucionesmoviles.viewmodel.FiltroDepartamento
 import com.idnp2025b.solucionesmoviles.viewmodel.UiState
 
 @Composable
 fun Departamento(
-    navController: NavController, viewModel: DepartamentoViewModel = hiltViewModel()
+    navController: NavController,
+    viewModel: DepartamentoViewModel = hiltViewModel()
 ) {
     val departamentos by viewModel.departamentos.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
@@ -66,111 +64,91 @@ fun Departamento(
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Filtros de estado
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            FilterChip(
-                selected = filtroActual == FiltroDepartamento.TODAS,
-                onClick = { viewModel.cargarDepartamentos(FiltroDepartamento.TODAS) },
-                label = { Text("Todos") }
+    Scaffold(
+        floatingActionButton = {
+            BotonFlotante(
+                onClick = { navController.navigate("new_departamento") },
+                contentDescription = "Nuevo Departamento"
             )
-            FilterChip(
-                selected = filtroActual == FiltroDepartamento.ACTIVAS,
-                onClick = { viewModel.cargarDepartamentos(FiltroDepartamento.ACTIVAS) },
-                label = { Text("Activos") }
-            )
-            FilterChip(
-                selected = filtroActual == FiltroDepartamento.INACTIVAS,
-                onClick = { viewModel.cargarDepartamentos(FiltroDepartamento.INACTIVAS) },
-                label = { Text("Inactivos") }
-            )
-            FilterChip(
-                selected = filtroActual == FiltroDepartamento.ELIMINADAS,
-                onClick = { viewModel.cargarDepartamentos(FiltroDepartamento.ELIMINADAS) },
-                label = { Text("Eliminados") }
-            )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
 
-        // Fila para Buscador y Orden
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxSize()
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("Buscar por nombre...") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                trailingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") }
-            )
-            IconToggleButton(
-                checked = ascendente,
-                onCheckedChange = { ascendente = !ascendente }
+
+            // FILTROS DE ESTADO
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), // Un poco más de aire
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                if (ascendente) {
-                    Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Orden Ascendente")
-                } else {
-                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Orden Descendente")
-                }
-            }
-        }
-
-        val departamentosProcesados = remember(departamentos, searchQuery, ascendente) {
-            departamentos
-                .filter { depto ->
-                    depto.nomDep.contains(searchQuery, ignoreCase = true)
-                }
-                .let { filtradas ->
-                    if (ascendente) {
-                        filtradas.sortedBy { it.nomDep }
-                    } else {
-                        filtradas.sortedByDescending { it.nomDep }
-                    }
-                }
-        }
-
-        // Lista de departamentos
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(departamentosProcesados) { departamento ->
-                DepartamentoItem (
-                    departamento = departamento,
-                    onActivar = { viewModel.activarDepartamento(it) },
-                    onInactivar = { viewModel.inactivarDepartamento(it) },
-                    onEliminar = { viewModel.eliminarLogicoDepartamento(it) },
-                    onEliminarFisico = { viewModel.deleteDepartamento(departamento) }, // Pasas el objeto
-                    onEditar = { navController.navigate("edit_departamento/${departamento.codDep}")}
+                val chips = listOf(
+                    Pair(FiltroDepartamento.TODAS, "Todos"),
+                    Pair(FiltroDepartamento.ACTIVAS, "Activos"),
+                    Pair(FiltroDepartamento.INACTIVAS, "Inactivos"),
+                    Pair(FiltroDepartamento.ELIMINADAS, "Papelera")
                 )
+                chips.forEach { (filtro, label) ->
+                    FilterChip(
+                        selected = filtroActual == filtro,
+                        onClick = { viewModel.cargarDepartamentos(filtro) },
+                        label = { Text(label) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+                }
             }
-        }
 
-        Spacer(Modifier.height(8.dp))
+            // BUSCADOR REUTILIZABLE
+            Buscador(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+                ascendente = ascendente,
+                onOrdenChange = { ascendente = it },
+                placeHolder = "Buscar departamento..."
+            )
 
-        // Botón agregar
-        Button(
-            onClick = { navController.navigate("new_departamento") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text("Agregar nuevo departamento")
+            // Logica de ordenamiento y filtrado local
+            val departamentosProcesados = remember(departamentos, searchQuery, ascendente) {
+                departamentos
+                    .filter { depto ->
+                        depto.nomDep.contains(searchQuery, ignoreCase = true)
+                    }
+                    .let { filtradas ->
+                        if (ascendente) filtradas.sortedBy { it.nomDep }
+                        else filtradas.sortedByDescending { it.nomDep }
+                    }
+            }
+
+            // LISTA DE DEPARTAMENTOS
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(departamentosProcesados) { departamento ->
+                    DepartamentoItem(
+                        departamento = departamento,
+                        onActivar = { viewModel.activarDepartamento(it) },
+                        onInactivar = { viewModel.inactivarDepartamento(it) },
+                        onEliminar = { viewModel.eliminarLogicoDepartamento(it) },
+                        onEliminarFisico = { viewModel.deleteDepartamento(departamento) },
+                        onEditar = { navController.navigate("edit_departamento/${departamento.codDep}") }
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
+            }
         }
     }
 }

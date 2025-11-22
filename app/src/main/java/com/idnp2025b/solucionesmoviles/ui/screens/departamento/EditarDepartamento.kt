@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -37,12 +41,14 @@ fun EditarDepartamento(
     viewModel: DepartamentoViewModel = hiltViewModel()
 ) {
     var nombreDepartamento by remember { mutableStateOf("") }
-        val uiState by viewModel.uiState.collectAsState()
+    var estadoDepartamento by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
     val departamento by viewModel.obtenerDepartamento(codDep).collectAsState(initial = null)
 
     LaunchedEffect(departamento) {
         departamento?.let {
-            nombreDepartamento = it.nomDep // Rellena el TextField con el nombre actual
+            nombreDepartamento = it.nomDep
+            estadoDepartamento = it.estDep
         }
     }
 
@@ -61,18 +67,22 @@ fun EditarDepartamento(
         }
     } else {
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
-            Text("Editar Departamento", style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(24.dp))
+            Text(
+                text = "Editar Departamento",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.height(32.dp))
 
-            // Campo de Código (no editable)
+            // Campo de Codigo (no editable)
             OutlinedTextField(
                 value = codDep.toString(),
                 onValueChange = {},
-                label = { Text("Código de Departamento") },
+                label = { Text("Codigo") },
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
                 enabled = false
@@ -84,19 +94,30 @@ fun EditarDepartamento(
             OutlinedTextField(
                 value = nombreDepartamento,
                 onValueChange = { nombreDepartamento = it },
-                label = { Text("Nombre del departamento") },
+                label = { Text("Nombre") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 enabled = uiState !is UiState.Loading
             )
             Spacer(Modifier.height(16.dp))
 
+            // Campo de estado (no editable)
+            OutlinedTextField(
+                value = estadoDepartamento,
+                onValueChange = {},
+                label = { Text("Estado") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                enabled = false
+            )
+
             Button(
                 onClick = {
-                    if (nombreDepartamento.isNotBlank()) {
+                    val nombreLimpio = nombreDepartamento.trim()
+                    if (nombreLimpio.isNotBlank()) {
                         departamento?.let { deptoOriginal ->
                             val deptoActualizado = deptoOriginal.copy(
-                                nomDep = nombreDepartamento
+                                nomDep = nombreLimpio
                             )
                             viewModel.actualizarDepartamento(deptoActualizado)
                         }
@@ -108,11 +129,15 @@ fun EditarDepartamento(
                 if (uiState is UiState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Actualizar Cambios")
+                    Icon(
+                        imageVector = Icons.Default.Save,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("GUARDAR", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

@@ -71,4 +71,7 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.52")
     ksp("com.google.dagger:hilt-android-compiler:2.52")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    //iconos
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
 }
