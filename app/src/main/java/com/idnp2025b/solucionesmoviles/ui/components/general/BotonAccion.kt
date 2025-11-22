@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.idnp2025b.solucionesmoviles.ui.theme.colorVerdeEstado
 import com.idnp2025b.solucionesmoviles.ui.theme.colorAmarilloEstado
@@ -37,7 +38,12 @@ fun RowScope.BotonAccion(
             contentColor = colorTextoCalculado
         )
     ) {
-        Text(texto)
+        Text(
+            text = texto,
+            style = MaterialTheme.typography.labelMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
