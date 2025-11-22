@@ -195,9 +195,9 @@ fun Planta(
                             onEditar = { if (!isProcessing) navController.navigate("edit_planta/${planta.codPla}") }
                         )
                     }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(80.dp))
+                    item {
+                        Spacer(modifier = Modifier.height(80.dp))
+                    }
                 }
             }
         }

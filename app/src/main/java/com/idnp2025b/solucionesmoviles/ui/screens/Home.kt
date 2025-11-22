@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DeleteForever // Icono para borrar
 import androidx.compose.material.icons.filled.HomeWork
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Storage // Icono para cargar datos
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -87,7 +88,7 @@ fun Home(
     val opcionesMenu = remember(isDbEmpty) {
         buildList {
             add(MenuItem("Gestión de\nTalleres", Icons.Filled.Build) { navController.navigate("taller") })
-            add(MenuItem("Gestión de\nDepartamentos", Icons.Default.AccountBox) { navController.navigate("departamento") })
+            add(MenuItem("Gestión de\nDepartamentos", Icons.Default.LocationOn) { navController.navigate("departamento") })
             add(MenuItem("Gestión de\nTipos de Taller", Icons.AutoMirrored.Filled.List) { navController.navigate("tipo_taller") })
             add(MenuItem("Gestión de\nPlantas", Icons.Default.HomeWork) { navController.navigate("planta") })
 

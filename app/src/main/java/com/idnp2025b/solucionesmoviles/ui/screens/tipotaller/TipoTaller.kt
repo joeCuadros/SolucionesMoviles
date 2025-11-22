@@ -200,9 +200,9 @@ fun TipoTaller(
                             onEditar = { if (!isProcessing) navController.navigate("edit_tipo_taller/${tipoTaller.codTipTal}") }
                         )
                     }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(80.dp))
+                    item {
+                        Spacer(modifier = Modifier.height(80.dp))
+                    }
                 }
             }
         }

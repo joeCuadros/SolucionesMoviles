@@ -203,9 +203,9 @@ fun Departamento(
                             onEditar = { if (!isProcessing) navController.navigate("edit_departamento/${departamento.codDep}") }
                         )
                     }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(80.dp))
+                    item {
+                        Spacer(modifier = Modifier.height(80.dp))
+                    }
                 }
             }
         }

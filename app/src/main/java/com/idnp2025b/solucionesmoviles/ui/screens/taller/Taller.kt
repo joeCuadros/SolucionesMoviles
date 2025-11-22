@@ -214,9 +214,9 @@ fun Taller(
                             onEditar = { if (!isProcessing) navController.navigate("edit_taller/${item.taller.codTal}") }
                         )
                     }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(80.dp))
+                    item {
+                        Spacer(modifier = Modifier.height(80.dp))
+                    }
                 }
             }
         }
