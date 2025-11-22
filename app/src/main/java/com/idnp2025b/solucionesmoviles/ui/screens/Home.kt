@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Build
@@ -49,6 +50,7 @@ data class MenuItem(
 @Composable
 fun Home(
     navController: NavController,
+    onLogout: () -> Unit,
     viewModel: ConfiguracionViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -100,6 +102,9 @@ fun Home(
 
             add(MenuItem("Borrar BD", Icons.Default.DeleteForever) {
                 mostrarAlertaBorrar = true
+            })
+            add(MenuItem("Cerrar Sesión", Icons.AutoMirrored.Filled.ExitToApp) {
+                onLogout()
             })
         }
     }

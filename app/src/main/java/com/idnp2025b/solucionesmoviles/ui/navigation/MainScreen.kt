@@ -1,15 +1,20 @@
 package com.idnp2025b.solucionesmoviles.ui.navigation
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 
 // Imports de Iconos
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountCircle
 
 // Imports de Runtime y Navegación
 import androidx.compose.runtime.Composable
@@ -18,6 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.*
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.idnp2025b.solucionesmoviles.ui.screens.planta.EditarPlanta
@@ -25,6 +38,7 @@ import com.idnp2025b.solucionesmoviles.ui.screens.Home
 import com.idnp2025b.solucionesmoviles.ui.screens.departamento.CrearDepartamento
 import com.idnp2025b.solucionesmoviles.ui.screens.departamento.Departamento
 import com.idnp2025b.solucionesmoviles.ui.screens.departamento.EditarDepartamento
+import com.idnp2025b.solucionesmoviles.ui.screens.login.Login
 import com.idnp2025b.solucionesmoviles.ui.screens.planta.CrearPlanta
 import com.idnp2025b.solucionesmoviles.ui.screens.planta.Planta
 import com.idnp2025b.solucionesmoviles.ui.screens.taller.CrearTaller
@@ -39,12 +53,12 @@ import com.idnp2025b.solucionesmoviles.ui.theme.miEstiloTopBar
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-
+    var usuarioActual by remember { mutableStateOf<String?>(null) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
     val currentScreenTitle = when {
-        // 2. Ahora compara en cada línea
+        currentDestination?.route == "login" -> "Inicio de sesion"
         currentDestination?.route == "home" -> "Inicio"
         // gestion de taller
         currentDestination?.route == "taller" -> "Talleres"
@@ -71,9 +85,35 @@ fun MainScreen() {
                 title = { Text(currentScreenTitle) },
                 colors = miEstiloTopBar(),
                 navigationIcon = {
-                    if (currentDestination?.route != "home") {
+                    if (currentDestination?.route != "home" && currentDestination?.route != "login") {
                         IconButton(onClick = { navController.navigateUp() }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
+                        }
+                    }
+                },
+                actions = {
+                    if (usuarioActual != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(end = 16.dp) // Un poco de margen a la derecha
+                        ) {
+                            // Nombre del usuario
+                            Text(
+                                text = usuarioActual ?: "",
+                                style = MaterialTheme.typography.labelLarge,
+                                // Importante: Usar onPrimary para que se vea blanco sobre la barra azul
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp)) // Espacio entre nombre e icono
+
+                            // Icono de persona
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Usuario",
+                                modifier = Modifier.size(30.dp),
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
                     }
                 }
@@ -86,8 +126,33 @@ fun MainScreen() {
             startDestination = "home", //pantalla inicial
             modifier = Modifier.padding(paddingValues)
         ) {
+            composable("login") {
+                Login(
+                    navController = navController,
+                    onLoginSuccess = { nuevoUsuario ->
+                        usuarioActual = nuevoUsuario
+                    }
+                )
+            }
             composable("home") {
-                Home(navController = navController)
+                // Verificamos si hay usuario (Protección extra)
+                if (usuarioActual != null) {
+                    Home(
+                        navController = navController,
+                        onLogout = {
+                            usuarioActual = null
+                            navController.navigate("login") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    )
+                } else {
+                    LaunchedEffect(Unit) {
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                }
             }
             // Rutas de taller
             composable("taller") {
