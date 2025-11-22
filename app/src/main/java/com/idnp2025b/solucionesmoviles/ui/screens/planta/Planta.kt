@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.idnp2025b.solucionesmoviles.ui.components.general.BotonFlotante
 import com.idnp2025b.solucionesmoviles.ui.components.general.Buscador
+import com.idnp2025b.solucionesmoviles.ui.components.general.CriterioOrden
 import com.idnp2025b.solucionesmoviles.ui.components.planta.PlantaItem
 import com.idnp2025b.solucionesmoviles.viewmodel.FiltroPlanta
 import com.idnp2025b.solucionesmoviles.viewmodel.PlantaViewModel
@@ -45,10 +47,12 @@ fun Planta(
     val plantas by viewModel.plantas.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val filtroActual by viewModel.filtroActual.collectAsState()
+    val isProcessing by viewModel.isProcessing.collectAsState()
     val context = LocalContext.current
 
     var searchQuery by remember { mutableStateOf("") }
     var ascendente by remember { mutableStateOf(true) }
+    var criterioOrden by remember { mutableStateOf(CriterioOrden.NOMBRE) }
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
@@ -112,19 +116,32 @@ fun Planta(
                 onQueryChange = { searchQuery = it },
                 ascendente = ascendente,
                 onOrdenChange = { ascendente = it },
+                criterioOrden = criterioOrden,
+                onCriterioChange = { criterioOrden = it },
                 placeHolder = "Buscar planta..."
             )
 
             // Lógica de ordenamiento y filtrado local
-            val plantasProcesadas = remember(plantas, searchQuery, ascendente) {
-                plantas
-                    .filter { planta ->
-                        planta.nomPla.contains(searchQuery, ignoreCase = true)
-                    }
-                    .let { filtradas ->
-                        if (ascendente) filtradas.sortedBy { it.nomPla }
-                        else filtradas.sortedByDescending { it.nomPla }
-                    }
+            val plantasProcesadas by remember(plantas, searchQuery, ascendente, criterioOrden) {
+                derivedStateOf {
+                    plantas
+                        .filter { planta ->
+                            planta.nomPla.contains(searchQuery, ignoreCase = true) ||
+                                    planta.codPla.toString().contains(searchQuery)
+                        }
+                        .let { filtradas ->
+                            when (criterioOrden) {
+                                CriterioOrden.NOMBRE -> {
+                                    if (ascendente) filtradas.sortedBy { it.nomPla }
+                                    else filtradas.sortedByDescending { it.nomPla }
+                                }
+                                CriterioOrden.CODIGO -> {
+                                    if (ascendente) filtradas.sortedBy { it.codPla }
+                                    else filtradas.sortedByDescending { it.codPla }
+                                }
+                            }
+                        }
+                }
             }
 
             // LISTA DE PLANTAS
@@ -138,11 +155,11 @@ fun Planta(
                 items(plantasProcesadas) { planta ->
                     PlantaItem(
                         planta = planta,
-                        onActivar = { viewModel.activarPlanta(it) },
-                        onInactivar = { viewModel.inactivarPlanta(it) },
-                        onEliminar = { viewModel.eliminarLogicoPlanta(it) },
-                        onEliminarFisico = { viewModel.deletePlanta(it) },
-                        onEditar = { navController.navigate("edit_planta/${planta.codPla}") }
+                        onActivar = { if (!isProcessing) viewModel.activarPlanta(it) },
+                        onInactivar = { if (!isProcessing) viewModel.inactivarPlanta(it) },
+                        onEliminar = { if (!isProcessing) viewModel.eliminarLogicoPlanta(it) },
+                        onEliminarFisico = { if (!isProcessing) viewModel.deletePlanta(it) },
+                        onEditar = { if (!isProcessing) navController.navigate("edit_planta/${planta.codPla}")  }
                     )
                 }
 

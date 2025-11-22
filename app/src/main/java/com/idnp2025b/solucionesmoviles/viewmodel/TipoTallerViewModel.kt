@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.idnp2025b.solucionesmoviles.data.entities.TipoTaller
 import com.idnp2025b.solucionesmoviles.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,13 +32,24 @@ class TipoTallerViewModel @Inject constructor(
     private val _filtroActual = MutableStateFlow(FiltroTipoTaller.ACTIVAS)
     val filtroActual: StateFlow<FiltroTipoTaller> = _filtroActual.asStateFlow()
 
+    // 👇 Protección contra clics rápidos
+    private val _isProcessing = MutableStateFlow(false)
+    val isProcessing: StateFlow<Boolean> = _isProcessing.asStateFlow()
+
+    // 👇 Job para cancelar la carga anterior
+    private var cargarJob: Job? = null
+
     init {
         cargarTipoTalleres(FiltroTipoTaller.ACTIVAS)
     }
 
     fun cargarTipoTalleres(filtro: FiltroTipoTaller = _filtroActual.value) {
+        // Cancela el job anterior si existe
+        cargarJob?.cancel()
+
         _filtroActual.value = filtro
-        viewModelScope.launch {
+
+        cargarJob = viewModelScope.launch {
             val flow = when (filtro) {
                 FiltroTipoTaller.TODAS -> repository.getTipoTallersTodas()
                 FiltroTipoTaller.ACTIVAS -> repository.getTipoTallersActivas()
@@ -55,73 +67,107 @@ class TipoTallerViewModel @Inject constructor(
     }
 
     fun agregarTipoTaller(nombre: String) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
             _uiState.value = UiState.Loading
             try {
                 repository.insertarTipoTaller(TipoTaller(nomTipTal = nombre, estTipTal = "A"))
-                _uiState.value = UiState.Success("Tipo de Taller agregado correctamente")
+                _uiState.value = UiState.Success("Tipo de Taller '$nombre' creado exitosamente")
             } catch (e: SQLiteConstraintException) {
-                _uiState.value = UiState.Error("El nombre del tipo de taller ya existe")
+                _uiState.value = UiState.Error("El tipo de taller '$nombre' ya existe en el sistema")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al guardar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo crear el tipo de taller '$nombre': ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }
 
     fun actualizarTipoTaller(tipoTaller: TipoTaller) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
             _uiState.value = UiState.Loading
             try {
                 repository.updateTipoTaller(tipoTaller)
-                _uiState.value = UiState.Success("Tipo de Taller actualizado correctamente")
+                _uiState.value = UiState.Success("Tipo de Taller '${tipoTaller.nomTipTal}' actualizado correctamente")
             } catch (e: SQLiteConstraintException) {
-                _uiState.value = UiState.Error("El nombre del tipo de taller ya existe")
+                _uiState.value = UiState.Error("Ya existe otro tipo de taller con el nombre '${tipoTaller.nomTipTal}'")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al actualizar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo actualizar '${tipoTaller.nomTipTal}': ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }
 
     fun activarTipoTaller(codTipTal: Int) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
+            _uiState.value = UiState.Loading
             try {
                 repository.activarTipoTaller(codTipTal)
-                _uiState.value = UiState.Success("Tipo de Taller activado")
+                _uiState.value = UiState.Success("Tipo de Taller activado exitosamente")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al activar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo activar el tipo de taller: ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }
 
     fun inactivarTipoTaller(codTipTal: Int) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
+            _uiState.value = UiState.Loading
             try {
                 repository.inactivarTipoTaller(codTipTal)
-                _uiState.value = UiState.Success("Tipo de Taller inactivado")
+                _uiState.value = UiState.Success("Tipo de Taller inactivado correctamente")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al inactivar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo inactivar el tipo de taller: ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }
 
     fun eliminarLogicoTipoTaller(codTipTal: Int) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
+            _uiState.value = UiState.Loading
             try {
                 repository.eliminarLogicoTipoTaller(codTipTal)
-                _uiState.value = UiState.Success("Tipo de Taller eliminado")
+                _uiState.value = UiState.Success("Tipo de Taller eliminado exitosamente")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al eliminar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo eliminar el tipo de taller: ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }
 
     fun deleteTipoTaller(tipoTaller: TipoTaller) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
+            _uiState.value = UiState.Loading
             try {
                 repository.deleteTipoTaller(tipoTaller)
-                _uiState.value = UiState.Success("Tipo de Taller eliminado permanentemente")
+                _uiState.value = UiState.Success("Tipo de Taller '${tipoTaller.nomTipTal}' eliminado permanentemente del sistema")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al eliminar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo eliminar permanentemente '${tipoTaller.nomTipTal}': ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }

@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.idnp2025b.solucionesmoviles.ui.components.general.BotonFlotante
 import com.idnp2025b.solucionesmoviles.ui.components.general.Buscador
+import com.idnp2025b.solucionesmoviles.ui.components.general.CriterioOrden
 import com.idnp2025b.solucionesmoviles.ui.components.tipotaller.TipoTallerItem
 import com.idnp2025b.solucionesmoviles.viewmodel.FiltroTipoTaller
 import com.idnp2025b.solucionesmoviles.viewmodel.TipoTallerViewModel
@@ -45,10 +47,12 @@ fun TipoTaller(
     val tipoTalleres by viewModel.tipoTalleres.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val filtroActual by viewModel.filtroActual.collectAsState()
+    val isProcessing by viewModel.isProcessing.collectAsState()
     val context = LocalContext.current
 
     var searchQuery by remember { mutableStateOf("") }
     var ascendente by remember { mutableStateOf(true) }
+    var criterioOrden by remember { mutableStateOf(CriterioOrden.NOMBRE) }
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
@@ -112,20 +116,34 @@ fun TipoTaller(
                 onQueryChange = { searchQuery = it },
                 ascendente = ascendente,
                 onOrdenChange = { ascendente = it },
+                criterioOrden = criterioOrden,
+                onCriterioChange = { criterioOrden = it },
                 placeHolder = "Buscar tipo de taller..."
             )
 
             // Lógica de ordenamiento y filtrado local
-            val tipoTalleresProcesados = remember(tipoTalleres, searchQuery, ascendente) {
-                tipoTalleres
-                    .filter { tt ->
-                        tt.nomTipTal.contains(searchQuery, ignoreCase = true)
-                    }
-                    .let { filtradas ->
-                        if (ascendente) filtradas.sortedBy { it.nomTipTal }
-                        else filtradas.sortedByDescending { it.nomTipTal }
-                    }
+            val tipoTalleresProcesados by remember(tipoTalleres, searchQuery, ascendente, criterioOrden) {
+                derivedStateOf {
+                    tipoTalleres
+                        .filter { tt ->
+                            tt.nomTipTal.contains(searchQuery, ignoreCase = true) ||
+                                    tt.codTipTal.toString().contains(searchQuery)
+                        }
+                        .let { filtradas ->
+                            when (criterioOrden) {
+                                CriterioOrden.NOMBRE -> {
+                                    if (ascendente) filtradas.sortedBy { it.nomTipTal }
+                                    else filtradas.sortedByDescending { it.nomTipTal }
+                                }
+                                CriterioOrden.CODIGO -> {
+                                    if (ascendente) filtradas.sortedBy { it.codTipTal }
+                                    else filtradas.sortedByDescending { it.codTipTal }
+                                }
+                            }
+                        }
+                }
             }
+
 
             // LISTA DE TIPO DE TALLERES
             LazyColumn(
@@ -138,11 +156,11 @@ fun TipoTaller(
                 items(tipoTalleresProcesados) { tipoTaller ->
                     TipoTallerItem(
                         tipoTaller = tipoTaller,
-                        onActivar = { viewModel.activarTipoTaller(it) },
-                        onInactivar = { viewModel.inactivarTipoTaller(it) },
-                        onEliminar = { viewModel.eliminarLogicoTipoTaller(it) },
-                        onEliminarFisico = { viewModel.deleteTipoTaller(tipoTaller) },
-                        onEditar = { navController.navigate("edit_tipo_taller/${tipoTaller.codTipTal}") }
+                        onActivar = { if (!isProcessing) viewModel.activarTipoTaller(it) },
+                        onInactivar = { if (!isProcessing) viewModel.inactivarTipoTaller(it) },
+                        onEliminar = { if (!isProcessing) viewModel.eliminarLogicoTipoTaller(it) },
+                        onEliminarFisico = { if (!isProcessing) viewModel.deleteTipoTaller(tipoTaller) },
+                        onEditar = { if (!isProcessing) navController.navigate("edit_tipo_taller/${tipoTaller.codTipTal}") }
                     )
                 }
 

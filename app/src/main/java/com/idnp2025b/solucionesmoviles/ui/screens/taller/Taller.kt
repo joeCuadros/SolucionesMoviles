@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +46,7 @@ fun Taller(navController: NavController, viewModel: TallerViewModel = hiltViewMo
     val talleres by viewModel.talleres.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val filtroActual by viewModel.filtroActual.collectAsState()
+    val isProcessing by viewModel.isProcessing.collectAsState()
     val context = LocalContext.current
 
     var searchQuery by remember { mutableStateOf("") }
@@ -126,20 +128,21 @@ fun Taller(navController: NavController, viewModel: TallerViewModel = hiltViewMo
         }
 
         // Lógica de filtrado y ordenamiento en local
-        val talleresProcesados = remember(talleres, searchQuery, ascendente) {
-            talleres
-                .filter { t ->
-                    // Buscamos por nombre de taller O nombre de planta
-                    t.taller.nomTal.contains(searchQuery, ignoreCase = true) ||
-                            (t.planta?.nomPla?.contains(searchQuery, ignoreCase = true) == true)
-                }
-                .let { filtradas ->
-                    if (ascendente) {
-                        filtradas.sortedBy { it.taller.nomTal }
-                    } else {
-                        filtradas.sortedByDescending { it.taller.nomTal }
+        val talleresProcesados by remember {
+            derivedStateOf {
+                talleres
+                    .filter { t ->
+                        t.taller.nomTal.contains(searchQuery, ignoreCase = true) ||
+                                (t.planta?.nomPla?.contains(searchQuery, ignoreCase = true) == true)
                     }
-                }
+                    .let { filtradas ->
+                        if (ascendente) {
+                            filtradas.sortedBy { it.taller.nomTal }
+                        } else {
+                            filtradas.sortedByDescending { it.taller.nomTal }
+                        }
+                    }
+            }
         }
 
         LazyColumn(
@@ -150,11 +153,11 @@ fun Taller(navController: NavController, viewModel: TallerViewModel = hiltViewMo
             items(talleresProcesados) { item ->
                 TallerItem(
                     tallerConDetalles = item,
-                    onActivar = { viewModel.activarTaller(it) },
-                    onInactivar = { viewModel.inactivarTaller(it) },
-                    onEliminar = { viewModel.eliminarLogicoTaller(it) },
-                    onEliminarFisico = { viewModel.deleteTaller(item.taller) },
-                    onEditar = { navController.navigate("edit_taller/${item.taller.codTal}") }
+                    onActivar = { if (!isProcessing) viewModel.activarTaller(it) },
+                    onInactivar = { if (!isProcessing) viewModel.inactivarTaller(it) },
+                    onEliminar = { if (!isProcessing) viewModel.eliminarLogicoTaller(it) },
+                    onEliminarFisico = { if (!isProcessing) viewModel.deleteTaller(item.taller) },
+                    onEditar = { if (!isProcessing) navController.navigate("edit_taller/${item.taller.codTal}") }
                 )
             }
         }

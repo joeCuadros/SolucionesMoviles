@@ -7,6 +7,7 @@ import com.idnp2025b.solucionesmoviles.data.entities.Taller
 import com.idnp2025b.solucionesmoviles.data.entities.TallerConDetalles
 import com.idnp2025b.solucionesmoviles.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,13 +34,26 @@ class TallerViewModel @Inject constructor(
     private val _filtroActual = MutableStateFlow(FiltroTaller.ACTIVAS)
     val filtroActual: StateFlow<FiltroTaller> = _filtroActual.asStateFlow()
 
+    // 👇 Protección contra clics rápidos
+    private val _isProcessing = MutableStateFlow(false)
+    val isProcessing: StateFlow<Boolean> = _isProcessing.asStateFlow()
+
+    // 👇 Jobs para cancelar las cargas anteriores
+    private var cargarJob: Job? = null
+    private var cargarPorPlantaJob: Job? = null
+
     init {
         cargarTalleres(FiltroTaller.ACTIVAS)
     }
 
     fun cargarTalleres(filtro: FiltroTaller = _filtroActual.value) {
+        // Cancela los jobs anteriores si existen
+        cargarJob?.cancel()
+        cargarPorPlantaJob?.cancel()
+
         _filtroActual.value = filtro
-        viewModelScope.launch {
+
+        cargarJob = viewModelScope.launch {
             val flow = when (filtro) {
                 FiltroTaller.TODAS -> repository.getTalleresTodas()
                 FiltroTaller.ACTIVAS -> repository.getTalleresActivas()
@@ -54,7 +68,11 @@ class TallerViewModel @Inject constructor(
 
     // Métodos extra para filtros específicos (opcional, pero muy útil)
     fun cargarTalleresPorPlanta(codPla: Int) {
-        viewModelScope.launch {
+        // Cancela los jobs anteriores si existen
+        cargarJob?.cancel()
+        cargarPorPlantaJob?.cancel()
+
+        cargarPorPlantaJob = viewModelScope.launch {
             repository.getTalleresPorPlanta(codPla).collect { lista ->
                 _talleres.value = lista
             }
@@ -67,7 +85,10 @@ class TallerViewModel @Inject constructor(
 
     // Para agregar necesitamos los IDs de las relaciones
     fun agregarTaller(nombre: String, codPla: Int, codDep: Int, codTipTal: Int) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
             _uiState.value = UiState.Loading
             try {
                 val nuevoTaller = Taller(
@@ -78,69 +99,100 @@ class TallerViewModel @Inject constructor(
                     estTal = "A" // Por defecto activo
                 )
                 repository.insertarTaller(nuevoTaller)
-                _uiState.value = UiState.Success("Taller agregado correctamente")
+                _uiState.value = UiState.Success("Taller '$nombre' creado exitosamente")
             } catch (e: SQLiteConstraintException) {
-                _uiState.value = UiState.Error("El nombre del taller ya existe")
+                _uiState.value = UiState.Error("El taller '$nombre' ya existe en el sistema")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al guardar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo crear el taller '$nombre': ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }
 
     fun actualizarTaller(taller: Taller) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
             _uiState.value = UiState.Loading
             try {
                 repository.updateTaller(taller)
-                _uiState.value = UiState.Success("Taller actualizado correctamente")
+                _uiState.value = UiState.Success("Taller '${taller.nomTal}' actualizado correctamente")
             } catch (e: SQLiteConstraintException) {
-                _uiState.value = UiState.Error("El nombre del taller ya existe")
+                _uiState.value = UiState.Error("Ya existe otro taller con el nombre '${taller.nomTal}'")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al actualizar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo actualizar '${taller.nomTal}': ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }
 
     fun activarTaller(codTal: Int) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
+            _uiState.value = UiState.Loading
             try {
                 repository.activarTaller(codTal)
-                _uiState.value = UiState.Success("Taller activado")
+                _uiState.value = UiState.Success("Taller activado exitosamente")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al activar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo activar el taller: ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }
 
     fun inactivarTaller(codTal: Int) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
+            _uiState.value = UiState.Loading
             try {
                 repository.inactivarTaller(codTal)
-                _uiState.value = UiState.Success("Taller inactivado")
+                _uiState.value = UiState.Success("Taller inactivado correctamente")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al inactivar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo inactivar el taller: ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }
 
     fun eliminarLogicoTaller(codTal: Int) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
+            _uiState.value = UiState.Loading
             try {
                 repository.eliminarLogicoTaller(codTal)
-                _uiState.value = UiState.Success("Taller eliminado")
+                _uiState.value = UiState.Success("Taller eliminado exitosamente")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al eliminar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo eliminar el taller: ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }
 
     fun deleteTaller(taller: Taller) {
+        if (_isProcessing.value) return
+
         viewModelScope.launch {
+            _isProcessing.value = true
+            _uiState.value = UiState.Loading
             try {
                 repository.deleteTaller(taller)
-                _uiState.value = UiState.Success("Taller eliminado permanentemente")
+                _uiState.value = UiState.Success("Taller '${taller.nomTal}' eliminado permanentemente del sistema")
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Error al eliminar: ${e.message}")
+                _uiState.value = UiState.Error("No se pudo eliminar permanentemente '${taller.nomTal}': ${e.message}")
+            } finally {
+                _isProcessing.value = false
             }
         }
     }

@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import androidx.navigation.NavController
 import com.idnp2025b.solucionesmoviles.ui.components.departamento.DepartamentoItem
 import com.idnp2025b.solucionesmoviles.ui.components.general.BotonFlotante
 import com.idnp2025b.solucionesmoviles.ui.components.general.Buscador
+import com.idnp2025b.solucionesmoviles.ui.components.general.CriterioOrden
 import com.idnp2025b.solucionesmoviles.viewmodel.DepartamentoViewModel
 import com.idnp2025b.solucionesmoviles.viewmodel.FiltroDepartamento
 import com.idnp2025b.solucionesmoviles.viewmodel.UiState
@@ -45,10 +47,12 @@ fun Departamento(
     val departamentos by viewModel.departamentos.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val filtroActual by viewModel.filtroActual.collectAsState()
+    val isProcessing by viewModel.isProcessing.collectAsState()
     val context = LocalContext.current
 
     var searchQuery by remember { mutableStateOf("") }
     var ascendente by remember { mutableStateOf(true) }
+    var criterioOrden by remember { mutableStateOf(CriterioOrden.NOMBRE) }
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
@@ -111,19 +115,33 @@ fun Departamento(
                 onQueryChange = { searchQuery = it },
                 ascendente = ascendente,
                 onOrdenChange = { ascendente = it },
+                criterioOrden = criterioOrden,
+                onCriterioChange = { criterioOrden = it },
                 placeHolder = "Buscar departamento..."
             )
 
             // Logica de ordenamiento y filtrado local
-            val departamentosProcesados = remember(departamentos, searchQuery, ascendente) {
-                departamentos
-                    .filter { depto ->
-                        depto.nomDep.contains(searchQuery, ignoreCase = true)
-                    }
-                    .let { filtradas ->
-                        if (ascendente) filtradas.sortedBy { it.nomDep }
-                        else filtradas.sortedByDescending { it.nomDep }
-                    }
+            val departamentosProcesados by remember(departamentos, searchQuery, ascendente, criterioOrden) {
+                derivedStateOf {
+                    departamentos
+                        .filter { depto ->
+                            depto.nomDep.contains(searchQuery, ignoreCase = true) ||
+                                    depto.codDep.toString().contains(searchQuery)
+                        }
+                        .let { filtradas ->
+                            // SOLUCIÓN: Separamos la lógica para que Kotlin sepa el tipo exacto
+                            when (criterioOrden) {
+                                CriterioOrden.NOMBRE -> {
+                                    if (ascendente) filtradas.sortedBy { it.nomDep }
+                                    else filtradas.sortedByDescending { it.nomDep }
+                                }
+                                CriterioOrden.CODIGO -> {
+                                    if (ascendente) filtradas.sortedBy { it.codDep }
+                                    else filtradas.sortedByDescending { it.codDep }
+                                }
+                            }
+                        }
+                }
             }
 
             // LISTA DE DEPARTAMENTOS
@@ -137,11 +155,11 @@ fun Departamento(
                 items(departamentosProcesados) { departamento ->
                     DepartamentoItem(
                         departamento = departamento,
-                        onActivar = { viewModel.activarDepartamento(it) },
-                        onInactivar = { viewModel.inactivarDepartamento(it) },
-                        onEliminar = { viewModel.eliminarLogicoDepartamento(it) },
-                        onEliminarFisico = { viewModel.deleteDepartamento(departamento) },
-                        onEditar = { navController.navigate("edit_departamento/${departamento.codDep}") }
+                        onActivar = { if (!isProcessing) viewModel.activarDepartamento(it) },
+                        onInactivar = { if (!isProcessing) viewModel.inactivarDepartamento(it) },
+                        onEliminar = { if (!isProcessing) viewModel.eliminarLogicoDepartamento(it) },
+                        onEliminarFisico = { if (!isProcessing) viewModel.deleteDepartamento(departamento) },
+                        onEditar = { if (!isProcessing) navController.navigate("edit_departamento/${departamento.codDep}") }
                     )
                 }
 
