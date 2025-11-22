@@ -10,10 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -153,17 +157,50 @@ fun TipoTaller(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(tipoTalleresProcesados) { tipoTaller ->
-                    TipoTallerItem(
-                        tipoTaller = tipoTaller,
-                        onActivar = { if (!isProcessing) viewModel.activarTipoTaller(it) },
-                        onInactivar = { if (!isProcessing) viewModel.inactivarTipoTaller(it) },
-                        onEliminar = { if (!isProcessing) viewModel.eliminarLogicoTipoTaller(it) },
-                        onEliminarFisico = { if (!isProcessing) viewModel.deleteTipoTaller(tipoTaller) },
-                        onEditar = { if (!isProcessing) navController.navigate("edit_tipo_taller/${tipoTaller.codTipTal}") }
-                    )
+                // --- LÓGICA DE LISTA VACÍA ---
+                if (tipoTalleresProcesados.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier.fillParentMaxSize().padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            // Un icono gris para ilustrar
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.outline
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "No se encontraron tipos de talleres",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "Intenta cambiar los filtros o la búsqueda",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                    }
+                } else {
+                    items(tipoTalleresProcesados) { tipoTaller ->
+                        TipoTallerItem(
+                            tipoTaller = tipoTaller,
+                            onActivar = { if (!isProcessing) viewModel.activarTipoTaller(it) },
+                            onInactivar = { if (!isProcessing) viewModel.inactivarTipoTaller(it) },
+                            onEliminar = { if (!isProcessing) viewModel.eliminarLogicoTipoTaller(it) },
+                            onEliminarFisico = {
+                                if (!isProcessing) viewModel.deleteTipoTaller(
+                                    tipoTaller
+                                )
+                            },
+                            onEditar = { if (!isProcessing) navController.navigate("edit_tipo_taller/${tipoTaller.codTipTal}") }
+                        )
+                    }
                 }
-
                 item {
                     Spacer(modifier = Modifier.height(80.dp))
                 }
